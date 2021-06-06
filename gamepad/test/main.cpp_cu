@@ -1,0 +1,106 @@
+#include <Arduino.h>
+#include <Keyboard.h>
+#include "config.h"
+
+// TODO:
+// Verify EXP1(ext pins)/EXP2(all pins) 
+// Verify USB
+
+void setup() { 
+  //set to low to on, floating to off
+  pinMode(PWR_CTRL, OUTPUT);
+
+  // motors
+ // pinMode(PB8, OUTPUT);
+  //pinMode(PB9, OUTPUT);
+  // // motor test  
+  // digitalWrite(MOTOR1, 0);delay(250);digitalWrite(MOTOR1, 1);pinMode(MOTOR1, INPUT_FLOATING);delay(500);
+  // digitalWrite(MOTOR2, 0);delay(500);digitalWrite(MOTOR2, 1);pinMode(MOTOR2, INPUT_FLOATING);
+  // delay(1000);
+
+  // leds
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+  pinMode(LED3, OUTPUT);
+  pinMode(LED4, OUTPUT);
+  // leds test
+  digitalWrite(LED1, 1);delay(500);
+  digitalWrite(LED2, 1);delay(500);
+  digitalWrite(LED3, 1);delay(500);
+  digitalWrite(LED4, 1);delay(500);
+  
+ // digitalWrite(LED1, 0);delay(200);
+  digitalWrite(LED2, 0);delay(200);
+  digitalWrite(LED3, 0);delay(200);
+  digitalWrite(LED4, 0);delay(200);
+
+  // input
+  pinMode(JADC_X_LEFT, INPUT);
+  pinMode(JADC_Y_LEFT, INPUT);
+  pinMode(JADC_X_RIGHT, INPUT);
+  pinMode(JADC_Y_RIGHT, INPUT);
+  pinMode(JSW_LEFT, INPUT_PULLUP);
+  pinMode(JSW_RIGHT, INPUT_PULLUP);
+  pinMode(MENU, INPUT_FLOATING);
+  pinMode(SELECT, INPUT_PULLUP);
+  pinMode(START, INPUT_PULLUP);
+  pinMode(CHRG, INPUT);
+  pinMode(UP, INPUT_PULLUP);
+  pinMode(DOWN, INPUT_PULLUP);
+  pinMode(LEFT, INPUT_PULLUP);
+  pinMode(RIGHT, INPUT_PULLUP);
+  pinMode(LEFT_TUP, INPUT_PULLUP);
+  pinMode(LEFT_TDOWN, INPUT_PULLUP);
+  pinMode(RIGHT_TUP, INPUT_PULLUP);
+  pinMode(RIGHT_TDOWN, INPUT_PULLUP);
+  pinMode(TRIANGLE, INPUT_PULLUP);
+  pinMode(CIRCLE, INPUT_PULLUP);
+  pinMode(FORK, INPUT_PULLUP);
+  pinMode(SQUARE, INPUT_PULLUP);
+
+  // uart1 test
+  Serial.begin(115200);
+  Serial.println("6Axis Firmware v0.1a");
+  Keyboard.begin();
+}
+
+int readButtons()
+{
+  int ret = 0;
+  ret |= !digitalRead(LEFT_TUP) << 0;
+  ret |= !digitalRead(LEFT_TDOWN) << 1;
+  ret |= !digitalRead(UP) << 2;
+  ret |= !digitalRead(LEFT) << 3;
+  ret |= !digitalRead(DOWN) << 4;
+  ret |= !digitalRead(RIGHT) << 5;
+  ret |= !digitalRead(SELECT) << 6;
+  ret |= !digitalRead(START) << 7;
+  ret |= !digitalRead(SQUARE) << 8;
+  ret |= !digitalRead(FORK) << 9;
+  ret |= !digitalRead(CIRCLE) << 10;
+  ret |= !digitalRead(TRIANGLE) << 11;
+  ret |= !digitalRead(RIGHT_TUP) << 12;
+  ret |= !digitalRead(RIGHT_TDOWN) << 13;
+  ret |= !digitalRead(JSW_LEFT) << 14;
+  ret |= !digitalRead(JSW_RIGHT) << 15;
+  ret = !digitalRead(MENU) ? 0xFFFF : ret;
+  return ret;
+}
+const int d = 20;
+int i=5000/d;
+int sd = 0;
+void loop() {
+  if (i--<=0) { sd = 1; pinMode(PWR_CTRL, INPUT_FLOATING); }
+  
+  int x_l = analogRead(JADC_X_LEFT);
+  int y_l = analogRead(JADC_Y_LEFT);
+  int x_r = analogRead(JADC_X_RIGHT);
+  int y_r = analogRead(JADC_Y_RIGHT);
+  int chrg = !digitalRead(CHRG);
+  digitalWrite(LED4, chrg);
+  digitalWrite(LED3, sd);
+  int buttons = readButtons();
+  Serial.printf("L=%4d:%4d  R=%4d:%4d  BTN=%x  CH=%1d  SD=%1d", x_l, y_l, x_r, y_r, buttons, chrg, sd);
+  Serial.println();
+  delay(d);
+}

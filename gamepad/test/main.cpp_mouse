@@ -1,0 +1,27 @@
+#include <Arduino.h>
+#include <Mouse.h>
+
+#define LED1            PC12
+#define LED2            PC13
+#define LED3            PC12
+#define LED4            PC13
+
+void setup() { 
+
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+  pinMode(LED3, OUTPUT);
+  pinMode(LED4, OUTPUT);
+  // uart1 test
+  Serial.begin(115200);
+  Serial.println("6Axis Firmware v0.1a");
+  delay(1000);
+  Mouse.begin();
+}
+void loop() {
+  Mouse.move(100,0); digitalWrite(LED1, 1);delay(1000);
+  Mouse.move(0,100); digitalWrite(LED1, 0);digitalWrite(LED2, 1); delay(1000);
+  Mouse.move(-100,0); digitalWrite(LED2, 0);digitalWrite(LED3, 1); delay(1000);
+  Mouse.move(0,-100); digitalWrite(LED3, 0);digitalWrite(LED4, 1); delay(1000);
+  Mouse.move(0,0); digitalWrite(LED4, 0); delay(1000);
+}
