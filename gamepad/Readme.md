@@ -1,6 +1,6 @@
-# Controller wiring
+# STM32 Controller wiring
 
-Programming port: 
+Programming (SWD) port: 
 - DIO/CLK/RST
 
 Back extension port(top view):
