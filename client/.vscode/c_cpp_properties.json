@@ -8,8 +8,8 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "p:/6axis_client_esp32/include",
-                "p:/6axis_client_esp32/src",
+                "p:/diy.6axis_gamepad/client/include",
+                "p:/diy.6axis_gamepad/client/src",
                 "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src",
                 "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/config",
                 "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/app_trace",
@@ -107,8 +107,8 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "p:/6axis_client_esp32/include",
-                    "p:/6axis_client_esp32/src",
+                    "p:/diy.6axis_gamepad/client/include",
+                    "p:/diy.6axis_gamepad/client/src",
                     "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src",
                     "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/config",
                     "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/app_trace",

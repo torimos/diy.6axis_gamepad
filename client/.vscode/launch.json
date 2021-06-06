@@ -12,7 +12,7 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "p:/6axis_client_esp32/.pio/build/esp32doit-devkit-v1/firmware.elf",
+            "executable": "p:/diy.6axis_gamepad/client/.pio/build/esp32doit-devkit-v1/firmware.elf",
             "projectEnvName": "esp32doit-devkit-v1",
             "toolchainBinDir": "C:/Users/olegv/.platformio/packages/toolchain-xtensa32/bin",
             "internalConsoleOptions": "openOnSessionStart",
@@ -25,7 +25,7 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "p:/6axis_client_esp32/.pio/build/esp32doit-devkit-v1/firmware.elf",
+            "executable": "p:/diy.6axis_gamepad/client/.pio/build/esp32doit-devkit-v1/firmware.elf",
             "projectEnvName": "esp32doit-devkit-v1",
             "toolchainBinDir": "C:/Users/olegv/.platformio/packages/toolchain-xtensa32/bin",
             "internalConsoleOptions": "openOnSessionStart"
