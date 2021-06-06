@@ -8,9 +8,9 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "p:/6axis_adapter_esp32/include",
-                "p:/6axis_adapter_esp32/src",
-                "p:/6axis_adapter_esp32/lib/blehid",
+                "p:/diy.6axis_gamepad/ble_wifi_adapter/include",
+                "p:/diy.6axis_gamepad/ble_wifi_adapter/src",
+                "p:/diy.6axis_gamepad/ble_wifi_adapter/lib/blehid",
                 "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src",
                 "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/config",
                 "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/app_trace",
@@ -75,7 +75,7 @@
                 "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/fb_gfx",
                 "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/cores/esp32",
                 "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/variants/ttgo-t7-v14-mini32",
-                "p:/6axis_adapter_esp32/.pio/libdeps/ttgo-t7-v14-mini32/ESP32-BLE-Gamepad",
+                "p:/diy.6axis_gamepad/ble_wifi_adapter/.pio/libdeps/ttgo-t7-v14-mini32/ESP32-BLE-Gamepad",
                 "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
                 "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src",
                 "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/libraries/AzureIoT/src",
@@ -109,9 +109,9 @@
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "p:/6axis_adapter_esp32/include",
-                    "p:/6axis_adapter_esp32/src",
-                    "p:/6axis_adapter_esp32/lib/blehid",
+                    "p:/diy.6axis_gamepad/ble_wifi_adapter/include",
+                    "p:/diy.6axis_gamepad/ble_wifi_adapter/src",
+                    "p:/diy.6axis_gamepad/ble_wifi_adapter/lib/blehid",
                     "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src",
                     "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/config",
                     "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/app_trace",
@@ -176,7 +176,7 @@
                     "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/fb_gfx",
                     "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/cores/esp32",
                     "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/variants/ttgo-t7-v14-mini32",
-                    "p:/6axis_adapter_esp32/.pio/libdeps/ttgo-t7-v14-mini32/ESP32-BLE-Gamepad",
+                    "p:/diy.6axis_gamepad/ble_wifi_adapter/.pio/libdeps/ttgo-t7-v14-mini32/ESP32-BLE-Gamepad",
                     "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
                     "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src",
                     "C:/Users/olegv/.platformio/packages/framework-arduinoespressif32/libraries/AzureIoT/src",
@@ -211,6 +211,7 @@
             "defines": [
                 "PLATFORMIO=50101",
                 "ARDUINO_TTGO_T7_V14_Mini32",
+                "DEBUG_LVL=0",
                 "ESP32",
                 "ESP_PLATFORM",
                 "F_CPU=240000000L",

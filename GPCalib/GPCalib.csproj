@@ -34,7 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="HidLibrary, Version=3.2.49.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\GPtest\packages\hidlibrary.3.3.40\lib\net45\HidLibrary.dll</HintPath>
+      <HintPath>packages\hidlibrary.3.3.40\lib\net45\HidLibrary.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
