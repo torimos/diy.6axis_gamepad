@@ -36,9 +36,9 @@ void loop() {
       Serial.printf("BTN=%04X  TL=%02X  TR=%02X  L=%4d:%4d  R=%4d:%4d  M=%4d:%4d:%4d  A=%4d:%4d:%4d  G=%4d:%4d:%4d\n\r",
         report.data.buttons,  report.data.triggers & 0xFF, (report.data.triggers >> 8) & 0xFF, 
         report.data.axis_data[0], report.data.axis_data[1], report.data.axis_data[2], report.data.axis_data[3], 
-        report.data.mag_data[0], report.data.mag_data[1], report.data.mag_data[2],
-        report.data.accel_data[0], report.data.accel_data[1], report.data.accel_data[2],
-        report.data.gyro_data[0], report.data.gyro_data[1], report.data.gyro_data[2]);
+        report.sens.mag_data[0], report.sens.mag_data[1], report.sens.mag_data[2],
+        report.sens.accel_data[0], report.sens.accel_data[1], report.sens.accel_data[2],
+        report.sens.gyro_data[0], report.sens.gyro_data[1], report.sens.gyro_data[2]);
       #endif
       if (last_report_crc != report.crc)
       {

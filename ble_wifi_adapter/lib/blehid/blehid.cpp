@@ -32,8 +32,8 @@ void BleHid::onDisconnect(BLEServer* server) {
 }
 
 void BleHid::onWrite(BLECharacteristic* characteristic) {
-    uint8_t* data = characteristic->getData();
     #if DEBUG_LVL >= 2
+    uint8_t* data = characteristic->getData();
     Serial.printf("OutputCallbacks onWrite: %02X %02X %02X %02X %02X\n\r", data[0], data[1], data[2], data[3], data[4]);
     #endif
 }

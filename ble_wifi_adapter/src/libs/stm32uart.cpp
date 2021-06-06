@@ -10,7 +10,7 @@ int16_t get_expected_frame_size(uint16_t frame_type, bool flag = true)
 {
   switch(frame_type)
   {
-    case 0x1: return sizeof(joy_data_t);
+    case 0x1: return sizeof(joy_data_t) + sizeof(sens_data_t);
   }
   return -1;
 }

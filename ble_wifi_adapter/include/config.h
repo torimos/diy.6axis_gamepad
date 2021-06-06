@@ -59,36 +59,36 @@ static const uint8_t REPORT_MAP[] = {
   0x09, 0x34,             //     USAGE (Ry)
   0x81, 0x02,             //     INPUT (Data,Var,Abs)
   0xC0,                   //   END COLLECTION
-  // Magn section
-  0x05, 0x01,             // 	 USAGE_PAGE (Generic Desktop)
-  0x09, 0x01,             //   USAGE (Pointer)
-  0xa1, 0x00,             //   COLLECTION (--)
-  0x95, 0x03,             //     REPORT_COUNT (3)
-  0x09, 0x40,             //     USAGE (Vx)
-  0x09, 0x41,             //     USAGE (Vy)
-  0x09, 0x42,             //     USAGE (Vz)
-  0x81, 0x02,             //     INPUT (Data,Var,Abs)
-  0xC0,                   //   END COLLECTION
-  // Accel section
-  0x05, 0x01,             // 	 USAGE_PAGE (Generic Desktop)
-  0x09, 0x01,             //   USAGE (Pointer)
-  0xa1, 0x00,             //   COLLECTION (--)
-  0x95, 0x03,             //     REPORT_COUNT (3)
-  0x09, 0x40,             //     USAGE (Vx)
-  0x09, 0x41,             //     USAGE (Vy)
-  0x09, 0x42,             //     USAGE (Vz)
-  0x81, 0x02,             //     INPUT (Data,Var,Abs)
-  0xC0,                   //   END COLLECTION
-  // Gyro section
-  0x05, 0x01,             // 	 USAGE_PAGE (Generic Desktop)
-  0x09, 0x01,             //   USAGE (Pointer)
-  0xa1, 0x00,             //   COLLECTION (--)
-  0x95, 0x03,             //     REPORT_COUNT (3)
-  0x09, 0x40,             //     USAGE (Vx)
-  0x09, 0x41,             //     USAGE (Vy)
-  0x09, 0x42,             //     USAGE (Vz)
-  0x81, 0x02,             //     INPUT (Data,Var,Abs)
-  0xC0,                   //   END COLLECTION
+  // // Magn section
+  // 0x05, 0x01,             // 	 USAGE_PAGE (Generic Desktop)
+  // 0x09, 0x01,             //   USAGE (Pointer)
+  // 0xa1, 0x00,             //   COLLECTION (--)
+  // 0x95, 0x03,             //     REPORT_COUNT (3)
+  // 0x09, 0x40,             //     USAGE (Vx)
+  // 0x09, 0x41,             //     USAGE (Vy)
+  // 0x09, 0x42,             //     USAGE (Vz)
+  // 0x81, 0x02,             //     INPUT (Data,Var,Abs)
+  // 0xC0,                   //   END COLLECTION
+  // // Accel section
+  // 0x05, 0x01,             // 	 USAGE_PAGE (Generic Desktop)
+  // 0x09, 0x01,             //   USAGE (Pointer)
+  // 0xa1, 0x00,             //   COLLECTION (--)
+  // 0x95, 0x03,             //     REPORT_COUNT (3)
+  // 0x09, 0x40,             //     USAGE (Vx)
+  // 0x09, 0x41,             //     USAGE (Vy)
+  // 0x09, 0x42,             //     USAGE (Vz)
+  // 0x81, 0x02,             //     INPUT (Data,Var,Abs)
+  // 0xC0,                   //   END COLLECTION
+  // // Gyro section
+  // 0x05, 0x01,             // 	 USAGE_PAGE (Generic Desktop)
+  // 0x09, 0x01,             //   USAGE (Pointer)
+  // 0xa1, 0x00,             //   COLLECTION (--)
+  // 0x95, 0x03,             //     REPORT_COUNT (3)
+  // 0x09, 0x40,             //     USAGE (Vx)
+  // 0x09, 0x41,             //     USAGE (Vy)
+  // 0x09, 0x42,             //     USAGE (Vz)
+  // 0x81, 0x02,             //     INPUT (Data,Var,Abs)
+  // 0xC0,                   //   END COLLECTION
 
   // Control report from host to device section
   0x09, 0x02,             //   USAGE (Vendor Usage 2)
