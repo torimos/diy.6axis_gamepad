@@ -21,7 +21,7 @@ public:
     uint8_t* reportMap;
     uint16_t reportMapSize;
     BLEHIDDevice* hid;
-    BLECharacteristic* input;
+    BLECharacteristic* inputs[2];
     BLECharacteristic* output;
     BLEAdvertising* advertising;
     bool isBleConnected;
@@ -39,7 +39,7 @@ public:
     void onDisconnect(BLEServer* server);
     void onWrite(BLECharacteristic* characteristic);
     static void taskServer(void* p);
-    void notify(uint8_t *data, size_t length);
+    void notify(uint8_t id, uint8_t *data, size_t length);
 };
 
 #endif

@@ -14,17 +14,35 @@ namespace GPCalib
 {
     public partial class Form1 : Form
     {
-        class ReportType {
+        class JoyDataType {
             public ushort buttons;
             public ushort triggers;
-            public List<short> axis;
-            public List<short> mag;
-            public List<short> accel;
-            public List<short> gyro;
+            public short[] axis;
             public bool ready;
-            public ReportType Copy()
+            public JoyDataType()
             {
-                return (ReportType)this.MemberwiseClone();
+                axis = new short[4];
+            }
+            public JoyDataType Copy()
+            {
+                return (JoyDataType)this.MemberwiseClone();
+            }
+        }
+        class SensDataType
+        {
+            public short[] mag;
+            public short[] accel;
+            public short[] gyro;
+            public bool ready;
+            public SensDataType()
+            {
+                mag = new short[3];
+                accel = new short[3];
+                gyro = new short[3];
+            }
+            public SensDataType Copy()
+            {
+                return (SensDataType)this.MemberwiseClone();
             }
         }
         class Item
@@ -33,14 +51,12 @@ namespace GPCalib
             public float min = 0, max = 0;
         }
         HidDevice device;
-        ReportType joyReport = new ReportType();
+        JoyDataType joyReport = new JoyDataType();
+        SensDataType sensReport = new SensDataType();
         Font fnt = new Font(FontFamily.GenericMonospace, 9);
         Dictionary<string, Item> buffers = new Dictionary<string, Item>();
 
         float pitch, roll, heading;
-        short rx, ry, rn;
-        float rh;
-        bool _attached = false;
 
         public Form1()
         {
@@ -65,49 +81,54 @@ namespace GPCalib
 
         private void DeviceAttachedHandler()
         {
-            _attached = true;
             device.ReadReport(OnReport);
         }
 
         private void DeviceRemovedHandler()
         {
-            _attached = false;
         }
 
         private void OnReport(HidReport report)
         {
             var br = new BinaryReader(new MemoryStream(report.Data));
-            var r = new ReportType();
-            r.buttons = br.ReadUInt16();
-            r.triggers = br.ReadUInt16();
-            r.axis = new List<short>();
-            r.mag = new List<short>();
-            r.accel = new List<short>();
-            r.gyro = new List<short>();
-            for (int i = 0; i < 4; i++) r.axis.Add(br.ReadInt16());
-            for (int i = 0; i < 3; i++) r.mag.Add(br.ReadInt16());
-            for (int i = 0; i < 3; i++) r.accel.Add(br.ReadInt16());
-            for (int i = 0; i < 3; i++) r.gyro.Add(br.ReadInt16());
+            if (report.ReportId == 1)
+            {
+                var r = new JoyDataType();
+                r.buttons = br.ReadUInt16();
+                r.triggers = br.ReadUInt16();
+                for (int i = 0; i < 4; i++) r.axis[i] = (br.ReadInt16());
 
+                joyReport = r.Copy();
+                joyReport.ready = true;
+            }
+            else if (report.ReportId == 2)
+            {
+                var r = new SensDataType();
+                for (int i = 0; i < 3; i++) r.mag[i] = (br.ReadInt16());
+                for (int i = 0; i < 3; i++) r.accel[i] = (br.ReadInt16());
+                for (int i = 0; i < 3; i++) r.gyro[i] = (br.ReadInt16());
 
-            //http://www.phipi.com/pthsrobotics/compass_correct.html
-            //file:///D:/Downloads/compass_calib.pdf
-            float x_ampl = 210;
-            float x_offset = -80;
-            float y_ampl = 192;
-            float y_offset = -210;
-            r.mag[0] = (short)((r.mag[0] - x_offset) * 300.0 / x_ampl);
-            r.mag[1] = (short)((r.mag[1] - y_offset) * 300.0 / y_ampl);
+                //http://www.phipi.com/pthsrobotics/compass_correct.html
+                //file:///D:/Downloads/compass_calib.pdf
+                float x_ampl = 210;
+                float x_offset = -80;
+                float y_ampl = 192;
+                float y_offset = -210;
+                r.mag[0] = (short)((r.mag[0] - x_offset) * 300.0 / x_ampl);
+                r.mag[1] = (short)((r.mag[1] - y_offset) * 300.0 / y_ampl);
 
-            calcHeading(r);
-            joyReport = r.Copy();
-            joyReport.ready = true;
+                sensReport = r.Copy();
+
+                calcHeading(sensReport);
+
+                sensReport.ready = true;
+            }
 
             device.ReadReport(OnReport);
             this.Invalidate();
         }
 
-        void calcHeading(ReportType rep)
+        void calcHeading(SensDataType rep)
         {
             float accelDiv = 0.5408f;
             // roll: Rotation around the X-axis. -180 <= roll <= 180
@@ -156,7 +177,6 @@ namespace GPCalib
             if (heading < 0) heading += 360;
             int z = (360 / 24);
             heading = z * (int)(heading / z);
-
         }
 
         void drawAxis(Graphics gfx, Brush br, int x, int y, int cx, int cy, int w, int h, int maxV = 32768)
@@ -223,9 +243,9 @@ namespace GPCalib
             }
             else
             {
-                drawPlot(gfx, Brushes.Red, $"mag_x", joyReport.mag[0] / 1, cx, cy + m2 * 0, w, m, 1000, true);
-                drawPlot(gfx, Brushes.Red, $"mag_y", joyReport.mag[1] / 1, cx, cy + m2 * 1, w, m, 1000, true);
-                drawPlot(gfx, Brushes.Red, $"mag_z", joyReport.mag[2] / 1, cx, cy + m2 * 2, w, m, 1000, true);
+                drawPlot(gfx, Brushes.Red, $"mag_x", sensReport.mag[0] / 1, cx, cy + m2 * 0, w, m, 1000, true);
+                drawPlot(gfx, Brushes.Red, $"mag_y", sensReport.mag[1] / 1, cx, cy + m2 * 1, w, m, 1000, true);
+                drawPlot(gfx, Brushes.Red, $"mag_z", sensReport.mag[2] / 1, cx, cy + m2 * 2, w, m, 1000, true);
             }
 
             float hd = m >> 1;
@@ -249,7 +269,6 @@ namespace GPCalib
             if (joyReport.ready)
             {
                 e.Graphics.DrawString($"{joyReport.buttons:X} {joyReport.triggers:X}", fnt, Brushes.Green, 0, 0);
-                if (rn > 0) e.Graphics.DrawString($"{rh / rn:F2} {rx / rn} {ry / rn}", fnt, Brushes.Green, 0, 16);
 
                 //var list = joyReport.accel; float scale = 1000; float div = 0.5408f; string title = "accel";
                 //var list = joyReport.gyro; float scale = 1000; float div = 14.3750f; string title = "gyro";
@@ -268,14 +287,6 @@ namespace GPCalib
             if (e.KeyCode == Keys.Space)
             {
                 buffers.Clear();
-                rx = ry = rn = 0;
-            }
-            else if (e.KeyCode == Keys.Q)
-            {
-                rx += joyReport.mag[0];
-                ry += joyReport.mag[1];
-                rh += heading;
-                rn++;
             }
         }
     }

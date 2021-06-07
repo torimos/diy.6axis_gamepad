@@ -13,7 +13,9 @@ bool BleHid::isConnected(void)
 void BleHid::onConnect(BLEServer* server) {
     isBleConnected = true;
     // Allow notifications for characteristics
-    BLE2902* cccDesc = (BLE2902*)input->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
+    BLE2902* cccDesc = (BLE2902*)inputs[0]->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
+    cccDesc->setNotifications(true);
+    cccDesc = (BLE2902*)inputs[1]->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
     cccDesc->setNotifications(true);
     #if DEBUG_LVL >= 2
     Serial.println("Client has connected");
@@ -23,7 +25,9 @@ void BleHid::onConnect(BLEServer* server) {
 void BleHid::onDisconnect(BLEServer* server) {
     isBleConnected = false;
     // Disallow notifications for characteristics
-    BLE2902* cccDesc = (BLE2902*)input->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
+    BLE2902* cccDesc = (BLE2902*)inputs[0]->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
+    cccDesc->setNotifications(false);
+    cccDesc = (BLE2902*)inputs[1]->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
     cccDesc->setNotifications(false);
     #if DEBUG_LVL >= 2
     Serial.println("Client has disconnected");
@@ -48,8 +52,9 @@ void BleHid::taskServer(void* p)
 
     // create an HID device
     dev->hid = new BLEHIDDevice(server);
-    dev->input = dev->hid->inputReport(1);
-    dev->output = dev->hid->outputReport(2); 
+    dev->inputs[0]= dev->hid->inputReport(1);
+    dev->inputs[1] = dev->hid->inputReport(2);
+    dev->output = dev->hid->outputReport(3); 
     dev->output->setCallbacks(dev);
 
     // set manufacturer name
@@ -102,8 +107,8 @@ void BleHid::taskServer(void* p)
     vTaskDelay(portMAX_DELAY);
 }
 
-void BleHid::notify(uint8_t *data, size_t length)
+void BleHid::notify(uint8_t id, uint8_t *data, size_t length)
 {
-    input->setValue(data, length);
-    input->notify();
+    inputs[id]->setValue(data, length);
+    inputs[id]->notify();
 }

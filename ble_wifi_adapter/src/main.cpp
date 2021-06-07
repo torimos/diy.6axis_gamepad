@@ -43,7 +43,8 @@ void loop() {
       if (last_report_crc != report.crc)
       {
         if (ble.isConnected()) {
-          ble.notify((uint8_t*)&report.data, sizeof(joy_data_t));
+          ble.notify(0, (uint8_t*)&report.data, sizeof(joy_data_t));
+          ble.notify(1, (uint8_t*)&report.sens, sizeof(sens_data_t));
           #if DEBUG_LVL >= 1
           ble_reports_cnt++;
           #endif
