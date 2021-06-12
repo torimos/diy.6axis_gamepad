@@ -49,6 +49,9 @@ ITG3200 itg = ITG3200();
 HMC5883L mag = HMC5883L();
 ADXL345 acc = ADXL345();
 
+
+stick_calib_t calib_left, calib_right;
+
 void io_init()
 {
     //set to low to on, floating to off
@@ -128,6 +131,57 @@ bool sensors_init()
     return true;
 }
 
+void calib_init()
+{
+    calib_left.xmin = 3999;
+    calib_left.xmax = 29919;
+    calib_left.ymin = 2207;
+    calib_left.ymax = 28991;
+    calib_left.xoffs = -160;
+    calib_left.yoffs = -352;
+
+    calib_right.xmin = 3775;
+    calib_right.xmax = 29119;
+    calib_right.ymin = 1823;
+    calib_right.ymax = 27967;
+    calib_right.xoffs = -1536;
+    calib_right.yoffs = -1088;
+}
+
+void calib_apply(stick_calib_t* calib, int16_t *ax, int16_t *ay)
+{
+    int m2 = 32768 / 2;
+    int cx = (m2 + calib->xoffs);
+    int cy = (m2 + calib->yoffs);
+
+    double dXmin = m2 / (double)(cx - calib->xmin);
+    double dXmax = m2 / (double)(calib->xmax - cx);
+    double dYmin = m2 / (double)(cy - calib->ymin);
+    double dYmax = m2 / (double)(calib->ymax - cy);
+
+    int x = *ax;
+    int y = *ay;
+
+    x -= cx;
+    y -= cy;
+
+    if (x < 0) x = (int)(x * dXmin);
+    if (x >= 0) x = (int)(x * dXmax);
+
+
+    if (y < 0) y = (int)(y * dYmin);
+    if (y >= 0) y = (int)(y * dYmax);
+
+    if (x >= m2) x = m2 - 1;
+    if (x < -m2) x = -m2;
+
+    if (y >= m2) y = m2 - 1;
+    if (y < -m2) y = -m2;
+
+    *ax = x;
+    *ay = y;
+}
+
 void setup() {
     Serial.begin(921600);
     memset(&usb_report, 0, sizeof(usb_report));
@@ -136,6 +190,7 @@ void setup() {
     digitalWrite(LED2, sensors_init());
     digitalWrite(EXT1, 1);// enable uart adapter
     digitalWrite(EXT2, 0);
+    calib_init();
 }
 
 float scale(float v, float vmax, float max)
@@ -174,10 +229,12 @@ void update()
 
     usb_report.data.buttons = buttons;
     usb_report.data.triggers = triggers;
-    usb_report.data.axis_data[0] = scale(x_l, 1024.0, 32767.0);
-    usb_report.data.axis_data[1] = scale(1024-y_l, 1024.0, 32767.0);
-    usb_report.data.axis_data[2] = scale(1024-y_r, 1024.0, 32767.0);
-    usb_report.data.axis_data[3] = scale(x_r, 1024.0, 32767.0);
+    usb_report.data.axis_data[0] = scale(x_l, 1024.0, 32768.0);
+    usb_report.data.axis_data[1] = scale(1024-y_l, 1024.0, 32768.0);
+    usb_report.data.axis_data[2] = scale(x_r, 1024.0, 32768.0);
+    usb_report.data.axis_data[3] = scale(1024-y_r, 1024.0, 32768.0);
+    calib_apply(&calib_left, &usb_report.data.axis_data[0], &usb_report.data.axis_data[1]);
+    calib_apply(&calib_right, &usb_report.data.axis_data[2], &usb_report.data.axis_data[3]);
 
     if (itg.isInitialized())
         itg.getRotation(&usb_report.data.gyro_data[0], &usb_report.data.gyro_data[1], &usb_report.data.gyro_data[2]);

@@ -50,6 +50,89 @@ namespace GPCalib
             public Queue<float> data = new Queue<float>();
             public float min = 0, max = 0;
         }
+        class StickCalib
+        {
+            private int m;
+            public int xmin, xmax, ymin, ymax;
+
+            public int xoffs, yoffs;
+
+            public StickCalib(int m)
+            {
+                this.m = m;
+                Reset();
+            }
+
+            public void Update(int x, int y)
+            {
+                xoffs = (x - m / 2);
+                yoffs = (y - m / 2);
+            }
+
+            public void Reset()
+            {
+                xoffs = yoffs = 0;
+                xmin = xmax = ymin = ymax = m/2;
+            }
+
+            public override string ToString()
+            {
+                return $"M={m} Xz={xoffs} Yz={yoffs} XM[{xmin},{xmax}] YM[{ymin},{ymax}]";
+            }
+
+            public void Draw(Graphics gfx, Font fnt, int x, int y)
+            {
+                gfx.DrawString(ToString(), fnt, Brushes.Green, x, y);
+            }
+
+            public void Load(string file)
+            {
+                var fname = $"{file}.json";
+                if (!File.Exists(fname)) return;
+                var json = File.ReadAllText(fname);
+                var v = Newtonsoft.Json.JsonConvert.DeserializeObject<StickCalib>(json);
+                xoffs = v.xoffs;
+                yoffs = v.yoffs;
+                xmin = v.xmin;
+                xmax = v.xmax;
+                ymin = v.ymin;
+                ymax = v.ymax;
+            }
+
+            public void Save(string file)
+            {
+                var json = Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+                File.WriteAllText($"{file}.json", json);
+            }
+
+            public void Apply(ref int x, ref int y)
+            {
+                int m2 = m / 2;
+                int cx = (m2 + xoffs);
+                int cy = (m2 + yoffs);
+
+                double dXmin = m2 / (double)(cx - xmin);
+                double dXmax = m2 / (double)(xmax - cx);
+                double dYmin = m2 / (double)(cy - ymin);
+                double dYmax = m2 / (double)(ymax - cy);
+
+                x -= cx;
+                y -= cy;
+
+                if (x < 0) x = (int)((x) * dXmin);
+                if (x >= 0) x = (int)((x) * dXmax);
+
+
+                if (y < 0) y = (int)((y) * dYmin);
+                if (y >= 0) y = (int)((y) * dYmax);
+
+                if (x >= m2) x = m2 - 1;
+                if (x < -m2) x = -m2;
+
+                if (y >= m2) y = m2 - 1;
+                if (y < -m2) y = -m2;
+            }
+        }
         HidDevice device;
         JoyDataType joyReport = new JoyDataType();
         SensDataType sensReport = new SensDataType();
@@ -57,15 +140,25 @@ namespace GPCalib
         Dictionary<string, Item> buffers = new Dictionary<string, Item>();
 
         float pitch, roll, heading;
+        const int AbsAxisMax = 32768;
+        StickCalib c1 = new StickCalib(AbsAxisMax);
+        StickCalib c2 = new StickCalib(AbsAxisMax);
+
 
         public Form1()
         {
             InitializeComponent();
+
             this.SetStyle(
                 ControlStyles.AllPaintingInWmPaint |
                 ControlStyles.UserPaint |
                 ControlStyles.DoubleBuffer,
                 true);
+
+
+
+            c1.Load("Left_config");
+            c2.Load("Right_config");
 
 
             device = HidDevices.Enumerate(0xE502, 0xBBAB).FirstOrDefault();
@@ -96,7 +189,10 @@ namespace GPCalib
                 var r = new JoyDataType();
                 r.buttons = br.ReadUInt16();
                 r.triggers = br.ReadUInt16();
-                for (int i = 0; i < 4; i++) r.axis[i] = (br.ReadInt16());
+                r.axis[0] = br.ReadInt16();
+                r.axis[1] = br.ReadInt16();
+                r.axis[2] = br.ReadInt16();
+                r.axis[3] = br.ReadInt16();
 
                 joyReport = r.Copy();
                 joyReport.ready = true;
@@ -179,17 +275,21 @@ namespace GPCalib
             heading = z * (int)(heading / z);
         }
 
-        void drawAxis(Graphics gfx, Brush br, int x, int y, int cx, int cy, int w, int h, int maxV = 32768)
+        void drawAxis(Graphics gfx, Brush br, int x, int y, int cx, int cy, int m, StickCalib calib, int maxV)
         {
-            var midH = w >> 1;
-            var midV = h >> 1;
-            var minSize = Math.Min(w, h);
-            var mH = maxV / (float)minSize;
-            var mV = maxV / (float)minSize;
+            const float pd = 5f;
+            var m2 = m >> 1;
+            var dV = m / (float)maxV;
 
-            gfx.DrawRectangle(new Pen(br), cx, cy, w, h);
-            gfx.DrawString($"{x}:{y}", fnt, br, cx+1, cy+1);
-            gfx.FillEllipse(br, cx + midH + (x-(maxV >> 1))/mH, cy + midV + (y - (maxV >> 1)) / mV, 10, 10);
+            int x1 = x;
+            int y1 = y;
+            //calib.Apply(ref x1, ref y1);
+
+            gfx.DrawRectangle(new Pen(br), cx, cy, m, m);
+            gfx.DrawString($"{x}:{y} \n {x1}:{y1}", fnt, br, cx+1, cy+1);
+            gfx.FillEllipse(br, cx + m2 - pd, cy + m2 - pd, pd*2, pd*2);
+
+            gfx.FillEllipse(Brushes.Red, cx + m2 + (x1 * dV) - (pd / 2), cy + m2 + (y1 * dV) - (pd / 2), pd, pd);
         }
 
         void drawPlot(Graphics gfx, Brush br, string title, float p, int cx, int cy, int w, int h, float scale, bool midZero)
@@ -228,12 +328,18 @@ namespace GPCalib
             const int m = 160;
             const int m2 = m + 20;
             int w = 500;
-            int cx = 0;
-            int cy1 = 30;
+            int cx = 20;
+            int cy1 = 50;
             int cy = m2+ cy1;
 
-            drawAxis(gfx, Brushes.Blue, joyReport.axis[0], joyReport.axis[1], 0, cy1, m, m);
-            drawAxis(gfx, Brushes.Green, joyReport.axis[3], joyReport.axis[2], m2, cy1, m, m);
+
+
+            gfx.DrawString($"{joyReport.buttons:X} {joyReport.triggers:X}", fnt, Brushes.Green, cx, 0);
+            c1.Draw(gfx, fnt, cx + 50, 0);
+            c2.Draw(gfx, fnt, cx + 50, 16);
+
+            drawAxis(gfx, Brushes.Blue, joyReport.axis[0], joyReport.axis[1], cx, cy1, m, c1, AbsAxisMax);
+            drawAxis(gfx, Brushes.Green, joyReport.axis[2], joyReport.axis[3], cx + m2, cy1, m, c2, AbsAxisMax);
 
             if (!rawMag)
             {
@@ -250,7 +356,7 @@ namespace GPCalib
 
             float hd = m >> 1;
             float hrad = (float)Math.PI * heading / 180.0f;
-            PointF pc = new PointF(m2*2.5f, cy1+m2>>1);
+            PointF pc = new PointF(m2*2.5f, 32+cy1+m2>>1);
             PointF pt = new PointF(pc.X + (float)Math.Sin(hrad) * hd, pc.Y + (float)Math.Cos(hrad) * hd);
             gfx.DrawEllipse(new Pen(Brushes.Gray, 1), pc.X - hd/2 - roll, pc.Y - hd / 2 - pitch, hd, hd);
             for (int i = 0; i < 24; i++)
@@ -268,7 +374,14 @@ namespace GPCalib
             base.OnPaint(e);
             if (joyReport.ready)
             {
-                e.Graphics.DrawString($"{joyReport.buttons:X} {joyReport.triggers:X}", fnt, Brushes.Green, 0, 0);
+                c1.xmin = Math.Min(c1.xmin, joyReport.axis[0]);
+                c1.xmax = Math.Max(c1.xmax, joyReport.axis[0]);
+                c1.ymin = Math.Min(c1.ymin, joyReport.axis[1]);
+                c1.ymax = Math.Max(c1.ymax, joyReport.axis[1]);
+                c2.xmin = Math.Min(c2.xmin, joyReport.axis[2]);
+                c2.xmax = Math.Max(c2.xmax, joyReport.axis[2]);
+                c2.ymin = Math.Min(c2.ymin, joyReport.axis[3]);
+                c2.ymax = Math.Max(c2.ymax, joyReport.axis[3]);
 
                 //var list = joyReport.accel; float scale = 1000; float div = 0.5408f; string title = "accel";
                 //var list = joyReport.gyro; float scale = 1000; float div = 14.3750f; string title = "gyro";
@@ -287,6 +400,19 @@ namespace GPCalib
             if (e.KeyCode == Keys.Space)
             {
                 buffers.Clear();
+                c1.Reset();
+                c2.Reset();
+            }
+            else if (e.KeyCode == Keys.Z)
+            {
+                c1.Update(joyReport.axis[0], joyReport.axis[1]);
+                c2.Update(joyReport.axis[2], joyReport.axis[3]);
+            }
+
+            if (e.KeyCode == Keys.Return)
+            {
+                c1.Save("Left_config");
+                c2.Save("Right_config");
             }
         }
     }

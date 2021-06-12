@@ -45,6 +45,12 @@ extern "C" {
 #define UART_REPORT_POOL_INTERVAL 5
 #define SLEEP_TIMEOUT 5000
 
+typedef struct
+{
+    int xmin, xmax, ymin, ymax, xoffs, yoffs;
+} stick_calib_t;
+
+
 #ifdef __cplusplus
 }
 #endif
