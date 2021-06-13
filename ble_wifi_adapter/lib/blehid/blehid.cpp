@@ -11,7 +11,6 @@ bool BleHid::isConnected(void)
 }
 
 void BleHid::onConnect(BLEServer* server) {
-    isBleConnected = true;
     // Allow notifications for characteristics
     BLE2902* cccDesc = (BLE2902*)inputs[0]->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
     cccDesc->setNotifications(true);
@@ -20,10 +19,10 @@ void BleHid::onConnect(BLEServer* server) {
     #if DEBUG_LVL >= 2
     Serial.println("Client has connected");
     #endif
+    isBleConnected = true;
 }
 
 void BleHid::onDisconnect(BLEServer* server) {
-    isBleConnected = false;
     // Disallow notifications for characteristics
     BLE2902* cccDesc = (BLE2902*)inputs[0]->getDescriptorByUUID(BLEUUID((uint16_t)0x2902));
     cccDesc->setNotifications(false);
@@ -32,6 +31,7 @@ void BleHid::onDisconnect(BLEServer* server) {
     #if DEBUG_LVL >= 2
     Serial.println("Client has disconnected");
     #endif
+    isBleConnected = false;
     advertising->start();
 }
 

@@ -1,12 +1,7 @@
-#ifndef __CONFIG_H
-#define __CONFIG_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#pragma once
 
 //MCU: STM32F103RBT6
-// prog pins: Yellow Red Brown (L2R), Blue to GND
+// prog pins: Yellow Red Brown (Dat-Clk-Rst), Blue to GND
 
 #define PWR_CTRL        PD2
 #define LED1            PC0
@@ -44,16 +39,4 @@ extern "C" {
 
 #define UART_REPORT_POOL_INTERVAL 5
 #define SLEEP_TIMEOUT 5000
-
-typedef struct
-{
-    int xmin, xmax, ymin, ymax, xoffs, yoffs;
-} stick_calib_t;
-
-
-#ifdef __cplusplus
-}
-#endif
-
-
-#endif
+#define CHAGING_BLINK_TIMEOUT 500

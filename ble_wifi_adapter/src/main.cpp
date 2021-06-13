@@ -16,22 +16,26 @@ void setup() {
   Serial.begin(115200);
   stm32_uart_init(&report);
   pinMode(EXT1, INPUT);
-  pinMode(EXT2, INPUT);
+  pinMode(EXT2, OUTPUT);
   ble.begin();
 }
 
 void loop() {
   uint32_t time = millis();
+  bool bleCon = ble.isConnected();
   int enabled = digitalRead(EXT1);
   if (enabled)
   {
-    int r = stm32_uart_process();
     #if DEBUG_LVL >= 1
+    int r = stm32_uart_process();
     if (r==1) success_cnt++;
     if (r<0) err_cnt++;
+    #else 
+    stm32_uart_process();
     #endif
     if ((time-last_report_time) >= REPORT_POOL_INTERVAL)
     {
+      digitalWrite(EXT2, bleCon);
       #if DEBUG_LVL >= 2
       Serial.printf("BTN=%04X  TL=%02X  TR=%02X  L=%4d:%4d  R=%4d:%4d  M=%4d:%4d:%4d  A=%4d:%4d:%4d  G=%4d:%4d:%4d\n\r",
         report.data.buttons,  report.data.triggers & 0xFF, (report.data.triggers >> 8) & 0xFF, 
@@ -42,7 +46,7 @@ void loop() {
       #endif
       if (last_report_crc != report.crc)
       {
-        if (ble.isConnected()) {
+        if (bleCon) {
           ble.notify(0, (uint8_t*)&report.data, sizeof(joy_data_t));
           ble.notify(1, (uint8_t*)&report.sens, sizeof(sens_data_t));
           #if DEBUG_LVL >= 1
@@ -64,5 +68,10 @@ void loop() {
       last_timer_time = time;
     }
     #endif
+  }
+  else
+  {
+    delay(1000);
+    esp_restart();
   }
 }

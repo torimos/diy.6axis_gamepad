@@ -276,7 +276,14 @@ static uint8_t HID_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
             case HID_REQ_SET_REPORT:
                 hhid->IsReportAvailable = 1U;
                 USBD_CtlPrepareRx(pdev, hhid->Report_buf, req->wLength);
-          break;
+                break;
+            case HID_REQ_GET_REPORT:
+                if (!HID_Device_GetReport((uint8_t)(req->wValue)))
+                {
+                    USBD_CtlError(pdev, req);
+                    ret = USBD_FAIL;
+                }
+                break;
             default:
                 USBD_CtlError(pdev, req);
                 ret = USBD_FAIL;
@@ -389,6 +396,14 @@ static uint8_t  *HID_GetDeviceQualifierDesc(uint16_t *length)
 {
   *length = sizeof(HID_DeviceQualifierDesc);
   return HID_DeviceQualifierDesc;
+}
+
+uint8_t HID_Device_SendCtrlReport(USBD_HandleTypeDef  *pdev, uint8_t *report, uint16_t len)
+{
+    if (pdev->dev_state == USBD_STATE_CONFIGURED) {
+        USBD_CtlSendData(pdev, report, len);
+    }
+    return USBD_OK;
 }
 
 uint8_t HID_Device_SendReport(USBD_HandleTypeDef  *pdev, uint8_t *report, uint16_t len)

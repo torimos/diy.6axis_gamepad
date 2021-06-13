@@ -211,7 +211,7 @@
             "defines": [
                 "PLATFORMIO=50101",
                 "ARDUINO_TTGO_T7_V14_Mini32",
-                "DEBUG_LVL=0",
+                "DEBUG_LVL=2",
                 "ESP32",
                 "ESP_PLATFORM",
                 "F_CPU=240000000L",

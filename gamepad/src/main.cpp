@@ -1,154 +1,27 @@
-#include <Arduino.h>
-#include <usb_hid.h>
-#include "config.h"
-#include "utils.h"
-
-#include <gyro.h>
-#include <magn.h>
-#include <accel.h>
+#include "main.h"
 
 USBD_HandleTypeDef* pdev = NULL;
-#pragma pack(push, 1)
-typedef struct
-{
-    uint16_t buttons;
-    uint16_t triggers;
-    int16_t axis_data[4];
-    int16_t mag_data[3];
-    int16_t accel_data[3];
-    int16_t gyro_data[3];
-} joy_data_t;
-typedef struct
-{
-    uint8_t id;
-    joy_data_t data;
-} usb_report_t;
-typedef struct
-{
-    uint32_t header;
-    uint16_t data_type;
-    uint16_t data_size;
-    joy_data_t data;
-    uint32_t crc;
-} uart_report_t;
-#pragma pack(pop)
 
 uart_report_t uart_report;
 usb_report_t usb_report;
+usb_params_report_t usb_params_report;
 
 uint32_t last_usb_report_time = 0;
 uint32_t last_uart_report_time = 0;
 uint32_t last_update_time = 0;
 uint32_t sleep_pressed_last_time = 0;
-bool con_state = false;
+uint32_t charging_blink_last_time = 0;
+bool usb_con_state = false;
+bool adapter_con_state = false;
 uint32_t data_checksum = 0;
 uint32_t last_usb_checksum = 0;
 uint32_t last_uart_checksum = 0;
 
-ITG3200 itg = ITG3200();
-HMC5883L mag = HMC5883L();
-ADXL345 acc = ADXL345();
 
+uint8_t params_buf[64];
+uint8_t params_buf_len = 0;
 
-stick_calib_t calib_left, calib_right;
-
-void io_init()
-{
-    //set to low to on, floating to off
-    pinMode(PWR_CTRL, OUTPUT);
-
-    // leds
-    pinMode(LED1, OUTPUT);
-    pinMode(LED2, OUTPUT);
-    pinMode(LED3, OUTPUT);
-    pinMode(LED4, OUTPUT);
-    // leds test
-    int led_delay = 300;
-    digitalWrite(LED1, 1);delay(led_delay);
-    digitalWrite(LED2, 1);delay(led_delay);
-    digitalWrite(LED3, 1);delay(led_delay);
-    digitalWrite(LED4, 1);delay(led_delay);
-    //digitalWrite(LED1, 0);delay(led_delay >> 1);
-    digitalWrite(LED2, 0);delay(led_delay >> 1);
-    digitalWrite(LED3, 0);delay(led_delay >> 1);
-    digitalWrite(LED4, 0);delay(led_delay >> 1);
-
-#ifdef MOTORS_ENABLED
-    // motors
-    pinMode(PB8, OUTPUT);
-    // motor test  
-    digitalWrite(MOTOR1, 0);delay(100);digitalWrite(MOTOR1, 1);pinMode(MOTOR1, INPUT_FLOATING);delay(500);
-
-    pinMode(PB9, OUTPUT);
-    digitalWrite(MOTOR2, 0);delay(100);digitalWrite(MOTOR2, 1);pinMode(MOTOR2, INPUT_FLOATING);delay(200);
-#endif
-
-    // input
-    pinMode(JADC_X_LEFT, INPUT_ANALOG);
-    pinMode(JADC_Y_LEFT, INPUT_ANALOG);
-    pinMode(JADC_X_RIGHT, INPUT_ANALOG);
-    pinMode(JADC_Y_RIGHT, INPUT_ANALOG);
-    pinMode(JSW_LEFT, INPUT_PULLUP);
-    pinMode(JSW_RIGHT, INPUT_PULLUP);
-    pinMode(MENU, INPUT_FLOATING);
-    pinMode(SELECT, INPUT_PULLUP);
-    pinMode(START, INPUT_PULLUP);
-    pinMode(CHRG, INPUT);
-    pinMode(UP, INPUT_PULLUP);
-    pinMode(DOWN, INPUT_PULLUP);
-    pinMode(LEFT, INPUT_PULLUP);
-    pinMode(RIGHT, INPUT_PULLUP);
-    pinMode(LEFT_TUP, INPUT_PULLUP);
-    pinMode(LEFT_TDOWN, INPUT_PULLUP);
-    pinMode(RIGHT_TUP, INPUT_PULLUP);
-    pinMode(RIGHT_TDOWN, INPUT_PULLUP);
-    pinMode(TRIANGLE, INPUT_PULLUP);
-    pinMode(CIRCLE, INPUT_PULLUP);
-    pinMode(FORK, INPUT_PULLUP);
-    pinMode(SQUARE, INPUT_PULLUP);
-    pinMode(EXT1, OUTPUT);
-    pinMode(EXT2, OUTPUT);
-}
-
-bool sensors_init()
-{
-    /* Initialise the sensor */
-    if(!mag.begin())
-    {
-        Serial.println("Ooops, no HMC5883 detected ... Check your wiring!");
-        return false;
-    }
-    if(!itg.begin())
-    {
-        Serial.println("Ooops, no ITG3205 detected ... Check your wiring!");
-        return false;
-    }
-    if(!acc.begin())
-    {
-        Serial.println("Ooops, no ADXL345 detected ... Check your wiring!");
-        return false;
-    }
-    return true;
-}
-
-void calib_init()
-{
-    calib_left.xmin = 3999;
-    calib_left.xmax = 29919;
-    calib_left.ymin = 2207;
-    calib_left.ymax = 28991;
-    calib_left.xoffs = -160;
-    calib_left.yoffs = -352;
-
-    calib_right.xmin = 3775;
-    calib_right.xmax = 29119;
-    calib_right.ymin = 1823;
-    calib_right.ymax = 27967;
-    calib_right.xoffs = -1536;
-    calib_right.yoffs = -1088;
-}
-
-void calib_apply(stick_calib_t* calib, int16_t *ax, int16_t *ay)
+void calib_apply(stick_calib_t* calib, int scale, int16_t *ax, int16_t *ay)
 {
     int m2 = 32768 / 2;
     int cx = (m2 + calib->xoffs);
@@ -182,15 +55,33 @@ void calib_apply(stick_calib_t* calib, int16_t *ax, int16_t *ay)
     *ay = y;
 }
 
-void setup() {
-    Serial.begin(921600);
+void setup() 
+{
     memset(&usb_report, 0, sizeof(usb_report));
+    memset(&usb_params_report, 0, sizeof(usb_params_report));
     pdev = USB_Init(&USBD_HID_Class);
+    
+    leds_init();
+    Serial.begin(115200);
+    bool settings_loaded = settings_init();
+    if (!settings_loaded)
+    {
+        leds_anim(B1010, B0101, 250, 2000);
+        leds_set(0);
+    }
+
+
+    bool sinit = sensors_init();
+    if (!sinit) {
+        leds_anim(B1110, B0000, 250, 1000);
+        leds_set(0);
+    }
+    
     io_init();
-    digitalWrite(LED2, sensors_init());
-    digitalWrite(EXT1, 1);// enable uart adapter
-    digitalWrite(EXT2, 0);
-    calib_init();
+
+    digitalWrite(EXT1, settings.uart_adapter_enabled);
+    if (settings.uart_adapter_enabled)
+        Serial.begin(921600);
 }
 
 float scale(float v, float vmax, float max)
@@ -229,12 +120,23 @@ void update()
 
     usb_report.data.buttons = buttons;
     usb_report.data.triggers = triggers;
-    usb_report.data.axis_data[0] = scale(x_l, 1024.0, 32768.0);
-    usb_report.data.axis_data[1] = scale(1024-y_l, 1024.0, 32768.0);
-    usb_report.data.axis_data[2] = scale(x_r, 1024.0, 32768.0);
-    usb_report.data.axis_data[3] = scale(1024-y_r, 1024.0, 32768.0);
-    calib_apply(&calib_left, &usb_report.data.axis_data[0], &usb_report.data.axis_data[1]);
-    calib_apply(&calib_right, &usb_report.data.axis_data[2], &usb_report.data.axis_data[3]);
+    usb_report.data.axis_data[0] = x_l;
+    usb_report.data.axis_data[1] = y_l;
+    usb_report.data.axis_data[2] = x_r;
+    usb_report.data.axis_data[3] = y_r;
+    
+    if (settings.scale_enabled)
+    {
+        usb_report.data.axis_data[0] = scale(usb_report.data.axis_data[0], settings.scale_from, settings.scale_to);
+        usb_report.data.axis_data[1] = scale(settings.scale_from-usb_report.data.axis_data[1], settings.scale_from, settings.scale_to);
+        usb_report.data.axis_data[2] = scale(usb_report.data.axis_data[2], settings.scale_from, settings.scale_to);
+        usb_report.data.axis_data[3] = scale(settings.scale_from-usb_report.data.axis_data[3], settings.scale_from, settings.scale_to);
+    }
+    if (settings.calib_enabled)
+    {
+        calib_apply(&settings.calib_left, settings.scale_to, &usb_report.data.axis_data[0], &usb_report.data.axis_data[1]);
+        calib_apply(&settings.calib_right, settings.scale_to, &usb_report.data.axis_data[2], &usb_report.data.axis_data[3]);
+    }
 
     if (itg.isInitialized())
         itg.getRotation(&usb_report.data.gyro_data[0], &usb_report.data.gyro_data[1], &usb_report.data.gyro_data[2]);
@@ -280,17 +182,25 @@ void report_uart()
 
 void loop() {
     uint32_t time = millis();
-    con_state = pdev->dev_state == USBD_STATE_CONFIGURED;
+    usb_con_state = pdev->dev_state == USBD_STATE_CONFIGURED;
+    adapter_con_state = digitalRead(EXT2);
 
     int shutdown_pressed = !digitalRead(SELECT);
     int chrg = !digitalRead(CHRG);
-    digitalWrite(LED4, chrg);
+    digitalWrite(LED1, usb_con_state);
+    digitalWrite(LED2, adapter_con_state);
 
-    // int rxc = Serial.read();
-    // if (rxc > 0)
-    // {
-    //      Serial.print(rxc);
-    // }
+    int timeout = (time-charging_blink_last_time);
+    if (chrg)
+    {
+        if (timeout >= CHAGING_BLINK_TIMEOUT)
+        {
+            digitalToggle(LED4);
+            charging_blink_last_time = time;
+        }
+    }
+    else
+         digitalWrite(LED4, 0);
 
     if (shutdown_pressed) {
         int timeout = (time-sleep_pressed_last_time);
@@ -309,17 +219,31 @@ void loop() {
         last_usb_report_time = time;
     }
 
-     if ((time-last_uart_report_time) >= UART_REPORT_POOL_INTERVAL)
+    if (((time-last_uart_report_time) >= UART_REPORT_POOL_INTERVAL) && settings.uart_adapter_enabled)
     {
         report_uart();
         last_uart_report_time = time;
     }
 
-
     if ((time-last_update_time) >= 5)
     {
         update();
         last_update_time = time;
+    }
+
+    if (params_buf_len)
+    {
+        // Serial.printf("PARAMS [%d]:\n\r", params_buf_len);
+        // for (int i=0;i<params_buf_len;i++)
+        // {
+        //     Serial.printf("%02X ", params_buf[i]);
+        // }
+        // Serial.println();
+        uint32_t crc = get_CRC32(params_buf, params_buf_len);
+        eeprom_write_data(0, &crc, sizeof(uint32_t));
+        eeprom_write_data(4, params_buf, params_buf_len);
+        params_buf_len = 0;
+        NVIC_SystemReset();
     }
 }
 
@@ -328,10 +252,33 @@ void HID_Device_ReceiveReport(uint8_t epnum, uint8_t *data)
     //Serial.printf("HID_DataOut ep: %02X. data: %02X %02X %02X %02X %02X %02X\n\r", epnum, data[0], data[1], data[2], data[3], data[4], data[5]);
     if (data[0] == REPORT_ID_PARAM)
     {
-        digitalWrite(LED1, data[1]);
-        digitalWrite(LED2, data[2]);
-        digitalWrite(LED3, data[3]);
-        digitalWrite(LED4, data[4]);
+        int len = data[1];
+        if (len == sizeof(settings_t)) {
+            memcpy(params_buf, data+2, len);
+            params_buf_len = len;
+        }
     }
     HID_Device_PrepareReceive(pdev, epnum);
+}
+bool HID_Device_GetReport(uint8_t id)
+{
+    switch(id)
+    {
+        case REPORT_ID_JOY:
+        {
+            usb_report.id = REPORT_ID_JOY;
+            HID_Device_SendCtrlReport(pdev, (uint8_t*)&usb_report, sizeof(usb_report));
+        }
+        break;
+        case REPORT_ID_PARAM:
+        {
+            usb_params_report.id = REPORT_ID_PARAM;
+            memcpy(&usb_params_report.data, &settings, sizeof(settings_t));
+            HID_Device_SendCtrlReport(pdev, (uint8_t*)&usb_params_report, sizeof(usb_params_report));
+        }
+        break;
+        default:
+            return false;
+    }
+    return true;
 }

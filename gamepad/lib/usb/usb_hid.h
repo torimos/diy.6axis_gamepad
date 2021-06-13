@@ -35,8 +35,10 @@ typedef struct {
 
 extern USBD_ClassTypeDef  USBD_HID_Class;
 
+uint8_t HID_Device_SendCtrlReport(USBD_HandleTypeDef  *pdev, uint8_t *report, uint16_t len);
 uint8_t HID_Device_SendReport(USBD_HandleTypeDef  *pdev, uint8_t *report, uint16_t len);
 extern void HID_Device_ReceiveReport(uint8_t epnum, uint8_t *data);
+extern bool HID_Device_GetReport(uint8_t id);
 uint8_t HID_Device_PrepareReceive(USBD_HandleTypeDef  *pdev, uint8_t epnum);
 
 #ifdef __cplusplus
