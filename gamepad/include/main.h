@@ -14,8 +14,7 @@
 #pragma pack(push, 1)
 typedef struct
 {
-    uint16_t buttons;
-    uint16_t triggers;
+    uint32_t buttons;
     int16_t axis_data[4];
     int16_t mag_data[3];
     int16_t accel_data[3];
@@ -24,7 +23,9 @@ typedef struct
 typedef struct
 {
     uint8_t id;
+    uint8_t status;
     joy_data_t data;
+    uint8_t __reserved2[32];
 } usb_report_t;
 typedef struct
 {

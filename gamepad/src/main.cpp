@@ -91,8 +91,7 @@ float scale(float v, float vmax, float max)
 
 void update()
 {
-    uint16_t buttons = 0;
-    uint16_t triggers = 0;
+    uint32_t buttons = 0;
 
     buttons |= !digitalRead(FORK) << 0;
     buttons |= !digitalRead(CIRCLE) << 1;
@@ -109,9 +108,8 @@ void update()
     buttons |= !digitalRead(JSW_LEFT) << 12;
     buttons |= !digitalRead(JSW_RIGHT) << 13;
     buttons |= !digitalRead(MENU) << 14;
-
-    triggers |= (!digitalRead(LEFT_TDOWN))*0xFF;
-    triggers |= (!digitalRead(RIGHT_TDOWN))*0xFF << 8;
+    buttons |= !digitalRead(LEFT_TDOWN) << 15;
+    buttons |= !digitalRead(RIGHT_TDOWN) << 16;
 
     int x_l = analogRead(JADC_X_LEFT);
     int y_l = analogRead(JADC_Y_LEFT);
@@ -119,7 +117,6 @@ void update()
     int y_r = analogRead(JADC_Y_RIGHT);
 
     usb_report.data.buttons = buttons;
-    usb_report.data.triggers = triggers;
     usb_report.data.axis_data[0] = x_l;
     usb_report.data.axis_data[1] = y_l;
     usb_report.data.axis_data[2] = x_r;
