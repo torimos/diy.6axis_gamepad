@@ -26,6 +26,7 @@ HID_StateTypeDef;
 
 typedef struct {
     uint8_t  Report_buf[REPORT_BUF_SIZE];
+    uint8_t  OutReport_buf[REPORT_BUF_SIZE];
     uint32_t Protocol;
     uint32_t IdleState;
     uint32_t AltSetting;

@@ -9,17 +9,23 @@ bool sensors_init()
     /* Initialise the sensor */
     if(!mag.begin())
     {
+        #if DEBUG_LVL > 3
         Serial.println("Ooops, no HMC5883 detected ... Check your wiring!");
+        #endif
         return false;
     }
     if(!itg.begin())
     {
+        #if DEBUG_LVL > 3
         Serial.println("Ooops, no ITG3205 detected ... Check your wiring!");
+        #endif
         return false;
     }
     if(!acc.begin())
     {
+        #if DEBUG_LVL > 3
         Serial.println("Ooops, no ADXL345 detected ... Check your wiring!");
+        #endif
         return false;
     }
     return true;

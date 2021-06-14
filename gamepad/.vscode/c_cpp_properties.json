@@ -104,6 +104,7 @@
                 "STM32F1",
                 "USBCON",
                 "USBD_USE_HID_COMPOSITE",
+                "DEBUG_LVL=0",
                 "STM32F1xx",
                 "ARDUINO=10808",
                 "ARDUINO_ARCH_STM32",

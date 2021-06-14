@@ -25,7 +25,6 @@ typedef struct
     uint8_t id;
     uint8_t status;
     joy_data_t data;
-    uint8_t __reserved2[32];
 } usb_report_t;
 typedef struct
 {

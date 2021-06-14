@@ -17,11 +17,11 @@ namespace GPCalib
         class JoyDataType {
             public ushort buttons;
             public ushort triggers;
-            public short[] axis;
+            public ushort[] axis;
             public bool ready;
             public JoyDataType()
             {
-                axis = new short[4];
+                axis = new ushort[4];
             }
             public JoyDataType Copy()
             {
@@ -49,163 +49,6 @@ namespace GPCalib
         {
             public Queue<float> data = new Queue<float>();
             public float min = 0, max = 0;
-        }
-        public class StickCalib
-        {
-            public short xmin, xmax, ymin, ymax, xoffs, yoffs;
-
-            public void Update(ushort m, short x, short y)
-            {
-                xoffs = (short)(x - m / 2);
-                yoffs = (short)(y - m / 2);
-            }
-
-            public void Reset(ushort m)
-            {
-                xoffs = yoffs = 0;
-                xmin = xmax = ymin = ymax = (short)(m / 2);
-            }
-
-            public override string ToString()
-            {
-                return $"Xz={xoffs} Yz={yoffs} XM[{xmin},{xmax}] YM[{ymin},{ymax}]";
-            }
-
-            public void Draw(Graphics gfx, Font fnt, int x, int y)
-            {
-                gfx.DrawString(ToString(), fnt, Brushes.Green, x, y);
-            }
-
-            public void Apply(short m, ref short x, ref short y)
-            {
-                short m2 = (short)(m / 2);
-                short cx = (short)(m2 + xoffs);
-                short cy = (short)(m2 + yoffs);
-
-                double dXmin = m2 / (double)(cx - xmin);
-                double dXmax = m2 / (double)(xmax - cx);
-                double dYmin = m2 / (double)(cy - ymin);
-                double dYmax = m2 / (double)(ymax - cy);
-
-                x -= cx;
-                y -= cy;
-
-                if (x < 0) x = (short)((x) * dXmin);
-                if (x >= 0) x = (short)((x) * dXmax);
-
-
-                if (y < 0) y = (short)((y) * dYmin);
-                if (y >= 0) y = (short)((y) * dYmax);
-
-                if (x >= m2) x = (short)(m2 - 1);
-                if (x < -m2) x = (short)(-m2);
-
-                if (y >= m2) y = (short)(m2 - 1);
-                if (y < -m2) y = (short)(-m2);
-            }
-
-            internal void Copy(StickCalib v)
-            {
-                xoffs = v.xoffs;
-                yoffs = v.yoffs;
-                xmin = v.xmin;
-                xmax = v.xmax;
-                ymin = v.ymin;
-                ymax = v.ymax;
-            }
-
-            internal byte[] ToArray()
-            {
-                var ms = new MemoryStream();
-                BinaryWriter bw = new BinaryWriter(ms);
-
-                bw.Write(xmin);
-                bw.Write(xmax);
-                bw.Write(ymin);
-                bw.Write(ymax);
-                bw.Write(xoffs);
-                bw.Write(yoffs);
-
-                return ms.ToArray();
-            }
-        }
-
-        public class Settings
-        {
-            public byte scale_enabled;
-            public byte calib_enabled;
-            public byte uart_adapter_enabled;
-            public ushort scale_from;
-            public ushort scale_to;
-            public StickCalib calib_left;
-            public StickCalib calib_right;
-
-            public Settings()
-            {
-                calib_left = new StickCalib();
-                calib_right = new StickCalib();
-            }
-
-            public void Reset()
-            {
-                calib_left.Reset(scale_to);
-                calib_right.Reset(scale_to);
-            }
-
-            public void Load(string file = "dev_settings")
-            {
-                var fname = $"{file}.json";
-                if (!File.Exists(fname)) return;
-                var json = File.ReadAllText(fname);
-                var s = Newtonsoft.Json.JsonConvert.DeserializeObject<Settings>(json);
-                scale_enabled = s.scale_enabled;
-                calib_enabled = s.calib_enabled;
-                uart_adapter_enabled = s.uart_adapter_enabled;
-                scale_from = s.scale_from;
-                scale_to = s.scale_to;
-                calib_left.Copy(s.calib_left);
-                calib_right.Copy(s.calib_right);
-            }
-
-            public void Save(string file = "dev_settings")
-            {
-                var json = Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-                File.WriteAllText($"{file}.json", json);
-            }
-
-            private byte[] ToArray()
-            {
-                var ms = new MemoryStream();
-                BinaryWriter bw = new BinaryWriter(ms);
-                bw.Write(scale_enabled);
-                bw.Write(calib_enabled);
-                bw.Write(uart_adapter_enabled);
-                bw.Write(scale_from);
-                bw.Write(scale_to);
-                bw.Write(calib_left.ToArray());
-                bw.Write(calib_right.ToArray());
-                return ms.ToArray();
-            }
-
-            public byte[] ToReport()
-            {
-                var ms = new MemoryStream();
-                BinaryWriter bw = new BinaryWriter(ms);
-                var data = ToArray();
-                bw.Write((byte)data.Length);
-                bw.Write(data);
-                var toRep = ms.ToArray();
-                return toRep;
-            }
-
-            // l:
-            // FD01 DF74 xminmax
-            // 0D02 3F71 yminmax
-            // 60FF A0FE xyoffs
-            // r:
-            // CD01 BF71 xminmax
-            // 1F02 3F6D yminmax
-            // 00FA C0FB xyoffs
         }
 
         HidDevice device;
@@ -257,10 +100,10 @@ namespace GPCalib
                 var r = new JoyDataType();
                 r.buttons = br.ReadUInt16();
                 r.triggers = br.ReadUInt16();
-                r.axis[0] = br.ReadInt16();
-                r.axis[1] = br.ReadInt16();
-                r.axis[2] = br.ReadInt16();
-                r.axis[3] = br.ReadInt16();
+                r.axis[0] = br.ReadUInt16();
+                r.axis[1] = br.ReadUInt16();
+                r.axis[2] = br.ReadUInt16();
+                r.axis[3] = br.ReadUInt16();
 
                 joyReport = r.Copy();
                 joyReport.ready = true;
@@ -397,14 +240,15 @@ namespace GPCalib
             const int m2 = m + 20;
             int w = 500;
             int cx = 20;
-            int cy1 = 50;
-            int cy = m2+ cy1;
+            int cy0 = 30;
+            int cy1 = cy0 + 32;
+            int cy = m2 + cy1;
 
 
 
-            gfx.DrawString($"{joyReport.buttons:X} {joyReport.triggers:X}", fnt, Brushes.Green, cx, 0);
-            settings.calib_left.Draw(gfx, fnt, cx + 50, 0);
-            settings.calib_right.Draw(gfx, fnt, cx + 50, 16);
+            gfx.DrawString($"{joyReport.buttons:X} {joyReport.triggers:X}", fnt, Brushes.Green, cx, cy0);
+            settings.calib_left.Draw(gfx, fnt, cx + 50, cy0);
+            settings.calib_right.Draw(gfx, fnt, cx + 50, cy0 + 16);
 
             drawAxis(gfx, Brushes.Blue, joyReport.axis[0], joyReport.axis[1], cx, cy1, m, settings.calib_left, settings.scale_to);
             drawAxis(gfx, Brushes.Green, joyReport.axis[2], joyReport.axis[3], cx + m2, cy1, m, settings.calib_right, settings.scale_to);
@@ -456,6 +300,13 @@ namespace GPCalib
             }
         }
 
+        private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DeviceSettings dlg = new DeviceSettings(device);
+            dlg.settings = settings;
+            DialogResult res = dlg.ShowDialog(this);
+        }
+
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
@@ -466,24 +317,13 @@ namespace GPCalib
             }
             else if (e.KeyCode == Keys.Z)
             {
-                settings.calib_left.Update(settings.scale_to, joyReport.axis[0], joyReport.axis[1]);
-                settings.calib_right.Update(settings.scale_to, joyReport.axis[2], joyReport.axis[3]);
+                //settings.calib_left.Update(settings.scale_to, joyReport.axis[0], joyReport.axis[1]);
+               // settings.calib_right.Update(settings.scale_to, joyReport.axis[2], joyReport.axis[3]);
             }
 
             if (e.KeyCode == Keys.Return)
             {
                 settings.Save();
-            }
-            else if (e.KeyCode == Keys.D0)
-            {
-                DialogResult r = MessageBox.Show("Are you sure want to update device settings?", "Device Settings", MessageBoxButtons.YesNo);
-                if (r == DialogResult.Yes)
-                {
-                    var rep = device.CreateReport();
-                    rep.ReportId = 0x2; // PARAMS
-                    rep.Data = settings.ToReport();
-                    device.WriteReport(rep);
-                }
             }
         }
     }

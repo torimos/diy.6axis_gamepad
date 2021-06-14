@@ -62,7 +62,9 @@ void setup()
     pdev = USB_Init(&USBD_HID_Class);
     
     leds_init();
+    #if DEBUG_LVL > 0
     Serial.begin(115200);
+    #endif
     bool settings_loaded = settings_init();
     if (!settings_loaded)
     {
@@ -143,13 +145,15 @@ void update()
         acc.getAcceleration(&usb_report.data.accel_data[0], &usb_report.data.accel_data[1], &usb_report.data.accel_data[2]);
 
     data_checksum = get_CRC32((uint8_t*)&usb_report.data, sizeof(joy_data_t));
-    // Serial.printf("L=%4d:%4d  R=%4d:%4d  M=%4d:%4d:%4d  A=%4d:%4d:%4d  G=%4d:%4d:%4d  BTN=%02X%02X%02X  sleep_timeout=%d\n\r", 
-    //     usb_report.data.axis_data[0], usb_report.data.axis_data[1], usb_report.data.axis_data[2], usb_report.data.axis_data[3], 
-    //     usb_report.data.mag_data[0], usb_report.data.mag_data[1], usb_report.data.mag_data[2],
-    //     usb_report.data.accel_data[0], usb_report.data.accel_data[1], usb_report.data.accel_data[2],
-    //     usb_report.data.gyro_data[0], usb_report.data.gyro_data[1], usb_report.data.gyro_data[2],
-    //     usb_report.data.button_data[2],  usb_report.data.button_data[1],  usb_report.data.button_data[0], 
-    //     (millis()-sleep_pressed_last_time));
+    #if DEBUG_LVL >= 2
+    Serial.printf("L=%4d:%4d  R=%4d:%4d  M=%4d:%4d:%4d  A=%4d:%4d:%4d  G=%4d:%4d:%4d  BTN=%08X  sleep_timeout=%d\n\r", 
+        usb_report.data.axis_data[0], usb_report.data.axis_data[1], usb_report.data.axis_data[2], usb_report.data.axis_data[3], 
+        usb_report.data.mag_data[0], usb_report.data.mag_data[1], usb_report.data.mag_data[2],
+        usb_report.data.accel_data[0], usb_report.data.accel_data[1], usb_report.data.accel_data[2],
+        usb_report.data.gyro_data[0], usb_report.data.gyro_data[1], usb_report.data.gyro_data[2],
+        usb_report.data.buttons, 
+        (millis()-sleep_pressed_last_time));
+    #endif
 }
 
 void report_usb()
@@ -230,12 +234,14 @@ void loop() {
 
     if (params_buf_len)
     {
-        // Serial.printf("PARAMS [%d]:\n\r", params_buf_len);
-        // for (int i=0;i<params_buf_len;i++)
-        // {
-        //     Serial.printf("%02X ", params_buf[i]);
-        // }
-        // Serial.println();
+        #if DEBUG_LVL >= 1
+        Serial.printf("PARAMS [%d]:\n\r", params_buf_len);
+        for (int i=0;i<params_buf_len;i++)
+        {
+            Serial.printf("%02X ", params_buf[i]);
+        }
+        Serial.println();
+        #endif
         uint32_t crc = get_CRC32(params_buf, params_buf_len);
         eeprom_write_data(0, &crc, sizeof(uint32_t));
         eeprom_write_data(4, params_buf, params_buf_len);
@@ -246,7 +252,9 @@ void loop() {
 
 void HID_Device_ReceiveReport(uint8_t epnum, uint8_t *data)
 {
-    //Serial.printf("HID_DataOut ep: %02X. data: %02X %02X %02X %02X %02X %02X\n\r", epnum, data[0], data[1], data[2], data[3], data[4], data[5]);
+    #if DEBUG_LVL >= 3
+    Serial.printf("%02X %02X\n\r", data[0], data[1]);
+    #endif
     if (data[0] == REPORT_ID_PARAM)
     {
         int len = data[1];
@@ -257,8 +265,12 @@ void HID_Device_ReceiveReport(uint8_t epnum, uint8_t *data)
     }
     HID_Device_PrepareReceive(pdev, epnum);
 }
+
 bool HID_Device_GetReport(uint8_t id)
 {
+    #if DEBUG_LVL >= 3
+    Serial.printf("HID_Device_GetReport id: %02X\n\r", id);
+    #endif
     switch(id)
     {
         case REPORT_ID_JOY:

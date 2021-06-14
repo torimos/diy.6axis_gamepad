@@ -160,24 +160,10 @@ __ALIGN_BEGIN static uint8_t HID_Device_ReportDesc[]  __ALIGN_END = {
     0x09, 0x42,             //     USAGE (Vz)
     0x81, 0x02,             //     INPUT (Data,Var,Abs)
     0xC0,                   //   END COLLECTION
-    // reserved 50-18=32
-    0x05, 0x01,             //   USAGE_PAGE (Desktop)	
-    0x75, 0x08,             //   REPORT_SIZE (8bit)
-    0x95, 0x20,             //   REPORT_COUNT (--)
-    0x09, 0x01,             //   USAGE (Pointer)
-    0x81, 0x02,             //   INPUT (Data, Var, Abs)
-    // 0x75, 0x08,             //   REPORT_SIZE (8bit)
-    // 0x95, 0x3F,             //   REPORT_COUNT (63+1)
-    // 0x09, 0x01,             //   USAGE (Pointer)
-    // 0x91, 0x02,             //   Output (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
-    // 0x75, 0x08,             //   REPORT_SIZE (8bit)
-    // 0x95, 0x3F,             //   REPORT_COUNT (63+1)
-    // 0x09, 0x01,             //   USAGE (Pointer)
-    // 0xB1, 0x02,             //   Feature (Data,Var,Abs,No Wrap,Linear,Preferred State,No Null Position,Non-volatile)
     0xC0,                   //  END COLLECTION
     // Control report from host to device section
-    0xA1, 0x02,             //  COLLECTION (Application)
     0x85, REPORT_ID_PARAM,  //   REPORT_ID	(--)
+    0xA1, 0x02,             //  COLLECTION (Application)
     0x75, 0x08,             //   REPORT_SIZE (8)
     0x95, 0x3F,             //   REPORT_COUNT (63+1)
     0x09, 0x01,             //   Usage (Pointer)
@@ -276,7 +262,7 @@ static uint8_t HID_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
     uint8_t *pbuf = NULL;
     uint16_t status_info = 0U;
     USBD_StatusTypeDef ret = USBD_OK;
-
+    //Serial.printf("HID bmREQ:%X bREQ:%X\n\r", req->bmRequest & USB_REQ_TYPE_MASK, req->bRequest);
     switch (req->bmRequest & USB_REQ_TYPE_MASK) {
         case USB_REQ_TYPE_CLASS :
             switch (req->bRequest) {
@@ -294,7 +280,7 @@ static uint8_t HID_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
                 break;
             case HID_REQ_SET_REPORT:
                 hhid->IsReportAvailable = 1U;
-                USBD_CtlPrepareRx(pdev, hhid->Report_buf, req->wLength);
+                USBD_CtlPrepareRx(pdev, hhid->OutReport_buf, req->wLength);
                 break;
             case HID_REQ_GET_REPORT:
                 if (!HID_Device_GetReport((uint8_t)(req->wValue)))
@@ -390,7 +376,7 @@ static uint8_t HID_EP0_RxReady(USBD_HandleTypeDef *pdev)
     }
     if (hhid->IsReportAvailable == 1U)
     {
-        HID_Device_ReceiveReport(0, ((HID_Class_DataTypeDef *)pdev->pClassData)->Report_buf);
+        HID_Device_ReceiveReport(0, ((HID_Class_DataTypeDef *)pdev->pClassData)->OutReport_buf);
         hhid->IsReportAvailable = 0U;
     }
 
