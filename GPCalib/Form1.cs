@@ -206,10 +206,10 @@ namespace GPCalib
             short y1 = y;
 
             if (settings.calib_enabled)
-                calib.Apply(settings.scale_to, ref x1, ref y1);
+                calib.Apply(settings.scale_from, settings.scale_to, ref x1, ref y1);
 
             gfx.DrawRectangle(new Pen(br), cx, cy, m, m);
-            gfx.DrawString($"{x}:{y} \n {x1 / 128}:{y1/128}", fnt, br, cx+1, cy+1);
+            gfx.DrawString($"{x}:{y} \n {x1}:{y1}", fnt, br, cx+1, cy+1);
             gfx.FillEllipse(br, cx + m2 - pd, cy + m2 - pd, pd*2, pd*2);
 
             gfx.FillEllipse(Brushes.Red, cx + m2 + (x1 * dV) - (pd / 2), cy + m2 + (y1 * dV) - (pd / 2), pd, pd);
@@ -308,7 +308,7 @@ namespace GPCalib
                 settings.calib_right.ymin = Math.Min(settings.calib_right.ymin, joyReport.axis[3]);
                 settings.calib_right.ymax = Math.Max(settings.calib_right.ymax, joyReport.axis[3]);
 
-                drawRPH(e.Graphics, true);
+                drawRPH(e.Graphics);
             }
         }
 
@@ -333,8 +333,8 @@ namespace GPCalib
             }
             else if (e.KeyCode == Keys.Z)
             {
-                settings.calib_left.Update(settings.scale_to, joyReport.axis[0], joyReport.axis[1]);
-                settings.calib_right.Update(settings.scale_to, joyReport.axis[2], joyReport.axis[3]);
+                settings.calib_left.Update(settings.scale_from, joyReport.axis[0], joyReport.axis[1]);
+                settings.calib_right.Update(settings.scale_from, joyReport.axis[2], joyReport.axis[3]);
             }
 
             if (e.KeyCode == Keys.Return)

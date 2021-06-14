@@ -29,12 +29,13 @@ namespace GPCalib
             gfx.DrawString(ToString(), fnt, Brushes.Green, x, y);
         }
 
-        public void Apply(ushort m, ref short x, ref short y)
+        public void Apply(ushort scaleFrom, ushort scaleTo, ref short x, ref short y)
         {
-            short m2 = (short)(m / 2);
+            short m2 = (short)(scaleFrom / 2);
             short cx = (short)(m2 + xoffs);
             short cy = (short)(m2 + yoffs);
 
+            double scaleFactor = (scaleTo / (double)scaleFrom);
             double dXmin = m2 / (double)(cx - xmin);
             double dXmax = m2 / (double)(xmax - cx);
             double dYmin = m2 / (double)(cy - ymin);
@@ -50,11 +51,14 @@ namespace GPCalib
             if (y < 0) y = (short)((y) * dYmin);
             if (y >= 0) y = (short)((y) * dYmax);
 
-            if (x >= m2) x = (short)(m2 - 1);
-            if (x < -m2) x = (short)(-m2);
+            x = (short)(x * scaleFactor);
+            y = (short)(y * scaleFactor);
 
-            if (y >= m2) y = (short)(m2 - 1);
-            if (y < -m2) y = (short)(-m2);
+            //if (x >= m2) x = (short)(m2 - 1);
+            //if (x < -m2) x = (short)(-m2);
+
+            //if (y >= m2) y = (short)(m2 - 1);
+            //if (y < -m2) y = (short)(-m2);
         }
 
         internal void Copy(StickCalib v)
@@ -95,14 +99,16 @@ namespace GPCalib
 
         public Settings()
         {
+            scale_from = 1024;
+            scale_to = 1024;
             calib_left = new StickCalib();
             calib_right = new StickCalib();
         }
 
         public void Reset()
         {
-            calib_left.Reset(scale_to);
-            calib_right.Reset(scale_to);
+            calib_left.Reset(scale_from);
+            calib_right.Reset(scale_from);
         }
 
         public void Load(string file = "dev_settings")
