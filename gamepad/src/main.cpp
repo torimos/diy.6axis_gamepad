@@ -83,7 +83,7 @@ void setup()
 
     bool sinit = sensors_init();
     if (!sinit) {
-        leds_anim(B1110, B0000, 250, 1000);
+        leds_anim(B1001, B0110, 250, 1000);
         leds_set(0);
     }
     
