@@ -36,15 +36,12 @@ typedef struct
 } uart_report_t;
 typedef struct
 {
-    int16_t xmin, xmax, ymin, ymax, xoffs, yoffs;
+    int16_t xmin, xmax, ymin, ymax, xoffs, yoffs, scale_to;
 } stick_calib_t;
 typedef struct
 {
-    uint8_t scale_enabled;
     uint8_t calib_enabled;
     uint8_t uart_adapter_enabled;
-    uint16_t scale_from;
-    uint16_t scale_to;
     stick_calib_t calib_left;
     stick_calib_t calib_right;
 } settings_t;

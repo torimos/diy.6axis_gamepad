@@ -196,17 +196,17 @@ namespace GPCalib
             heading = z * (int)(heading / z);
         }
 
-        void drawAxis(Graphics gfx, Brush br, short x, short y, int cx, int cy, int m, StickCalib calib, int maxV)
+        void drawAxis(Graphics gfx, Brush br, short x, short y, int cx, int cy, int m, StickCalib calib)
         {
             const float pd = 5f;
             var m2 = m >> 1;
-            var dV = m / (float)maxV;
+            var dV = m / (float)calib.scaleTo;
 
             short x1 = x;
             short y1 = y;
 
             if (settings.calib_enabled)
-                calib.Apply(settings.scale_from, settings.scale_to, ref x1, ref y1);
+                calib.Apply(ref x1, ref y1);
 
             gfx.DrawRectangle(new Pen(br), cx, cy, m, m);
             gfx.DrawString($"{x}:{y} \n {x1}:{y1}", fnt, br, cx+1, cy+1);
@@ -262,8 +262,8 @@ namespace GPCalib
             settings.calib_left.Draw(gfx, fnt, cx + 50, cy0);
             settings.calib_right.Draw(gfx, fnt, cx + 50, cy0 + 16);
 
-            drawAxis(gfx, Brushes.Blue, joyReport.axis[0], joyReport.axis[1], cx, cy1, m, settings.calib_left, settings.scale_to);
-            drawAxis(gfx, Brushes.Green, joyReport.axis[2], joyReport.axis[3], cx + m2, cy1, m, settings.calib_right, settings.scale_to);
+            drawAxis(gfx, Brushes.Blue, joyReport.axis[0], joyReport.axis[1], cx, cy1, m, settings.calib_left);
+            drawAxis(gfx, Brushes.Green, joyReport.axis[2], joyReport.axis[3], cx + m2, cy1, m, settings.calib_right);
 
             if (!rawMag)
             {
@@ -333,8 +333,8 @@ namespace GPCalib
             }
             else if (e.KeyCode == Keys.Z)
             {
-                settings.calib_left.Update(settings.scale_from, joyReport.axis[0], joyReport.axis[1]);
-                settings.calib_right.Update(settings.scale_from, joyReport.axis[2], joyReport.axis[3]);
+                settings.calib_left.Update(joyReport.axis[0], joyReport.axis[1]);
+                settings.calib_right.Update(joyReport.axis[2], joyReport.axis[3]);
             }
 
             if (e.KeyCode == Keys.Return)

@@ -21,19 +21,23 @@ uint32_t last_uart_checksum = 0;
 uint8_t params_buf[64];
 uint8_t params_buf_len = 0;
 
-void calib_apply(stick_calib_t* calib, int scale, int16_t *ax, int16_t *ay)
+void calib_apply(stick_calib_t* calib, int16_t *ax, int16_t *ay)
 {
-    int m2 = 32768 / 2;
-    int cx = (m2 + calib->xoffs);
-    int cy = (m2 + calib->yoffs);
+    int16_t scaleFrom = AXIS_MAX_VALUE;
+    int16_t scaleTo = calib->scale_to;
+    int16_t m2 = (short)(scaleFrom / 2);
+    int16_t mTo2 = (short)(scaleTo / 2);
+    int16_t cx = (m2 + calib->xoffs);
+    int16_t cy = (m2 + calib->yoffs);
 
+    double scaleFactor = (scaleTo / (double)scaleFrom);
     double dXmin = m2 / (double)(cx - calib->xmin);
     double dXmax = m2 / (double)(calib->xmax - cx);
     double dYmin = m2 / (double)(cy - calib->ymin);
     double dYmax = m2 / (double)(calib->ymax - cy);
 
-    int x = *ax;
-    int y = *ay;
+    int16_t x = *ax;
+    int16_t y = *ay;
 
     x -= cx;
     y -= cy;
@@ -41,15 +45,17 @@ void calib_apply(stick_calib_t* calib, int scale, int16_t *ax, int16_t *ay)
     if (x < 0) x = (int)(x * dXmin);
     if (x >= 0) x = (int)(x * dXmax);
 
-
     if (y < 0) y = (int)(y * dYmin);
     if (y >= 0) y = (int)(y * dYmax);
 
-    if (x >= m2) x = m2 - 1;
-    if (x < -m2) x = -m2;
+    x = (short)(x * scaleFactor);
+    y = (short)(y * scaleFactor);
 
-    if (y >= m2) y = m2 - 1;
-    if (y < -m2) y = -m2;
+    if (x >= mTo2) x = mTo2 - 1;
+    if (x < -mTo2) x = -mTo2;
+
+    if (y >= mTo2) y = mTo2 - 1;
+    if (y < -mTo2) y = -mTo2;
 
     *ax = x;
     *ay = y;
@@ -115,28 +121,15 @@ void update()
     buttons |= !digitalRead(RIGHT_TDOWN) << 16;
 
     int x_l = analogRead(JADC_X_LEFT);
-    int y_l = 1024 - analogRead(JADC_Y_LEFT);
+    int y_l = AXIS_MAX_VALUE - analogRead(JADC_Y_LEFT);
     int x_r = analogRead(JADC_X_RIGHT);
-    int y_r = 1024 - analogRead(JADC_Y_RIGHT);
+    int y_r = AXIS_MAX_VALUE - analogRead(JADC_Y_RIGHT);
 
     usb_report.data.buttons = buttons;
     usb_report.data.axis_data[0] = x_l;
     usb_report.data.axis_data[1] = y_l;
     usb_report.data.axis_data[2] = x_r;
     usb_report.data.axis_data[3] = y_r;
-    
-    if (settings.scale_enabled)
-    {
-        usb_report.data.axis_data[0] = scale(usb_report.data.axis_data[0], settings.scale_from, settings.scale_to);
-        usb_report.data.axis_data[1] = scale(usb_report.data.axis_data[1], settings.scale_from, settings.scale_to);
-        usb_report.data.axis_data[2] = scale(usb_report.data.axis_data[2], settings.scale_from, settings.scale_to);
-        usb_report.data.axis_data[3] = scale(usb_report.data.axis_data[3], settings.scale_from, settings.scale_to);
-    }
-    if (settings.calib_enabled)
-    {
-        calib_apply(&settings.calib_left, settings.scale_to, &usb_report.data.axis_data[0], &usb_report.data.axis_data[1]);
-        calib_apply(&settings.calib_right, settings.scale_to, &usb_report.data.axis_data[2], &usb_report.data.axis_data[3]);
-    }
 
     if (itg.isInitialized())
         itg.getRotation(&usb_report.data.gyro_data[0], &usb_report.data.gyro_data[1], &usb_report.data.gyro_data[2]);
@@ -144,6 +137,12 @@ void update()
         mag.getScaled(&usb_report.data.mag_data[0], &usb_report.data.mag_data[1], &usb_report.data.mag_data[2]);
     if (acc.isInitialized())
         acc.getAcceleration(&usb_report.data.accel_data[0], &usb_report.data.accel_data[1], &usb_report.data.accel_data[2]);
+    
+    if (settings.calib_enabled)
+    {
+        calib_apply(&settings.calib_left, &usb_report.data.axis_data[0], &usb_report.data.axis_data[1]);
+        calib_apply(&settings.calib_right, &usb_report.data.axis_data[2], &usb_report.data.axis_data[3]);
+    }
 
     data_checksum = get_CRC32((uint8_t*)&usb_report.data, sizeof(joy_data_t));
     #if DEBUG_LVL >= 1

@@ -11,7 +11,6 @@ bool settings_init()
     uint32_t dataCrc = get_CRC32((uint8_t*)&settings, sizeof(settings_t));
     if (crc > 0 && dataCrc != crc)
     {
-        settings.scale_enabled = false;
         settings.calib_enabled = false;
         settings.uart_adapter_enabled = false;
         res = false;

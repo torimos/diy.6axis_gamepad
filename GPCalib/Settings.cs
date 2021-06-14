@@ -5,23 +5,23 @@ namespace GPCalib
 {
     public class StickCalib
     {
-        public short xmin, xmax, ymin, ymax, xoffs, yoffs;
+        public short xmin, xmax, ymin, ymax, xoffs, yoffs, scaleTo;
 
-        public void Update(ushort m, short x, short y)
+        public void Update(short x, short y)
         {
-            xoffs = (short)(x - m / 2);
-            yoffs = (short)(y - m / 2);
+            xoffs = (short)(x - 512);
+            yoffs = (short)(y - 512);
         }
 
-        public void Reset(ushort m)
+        public void Reset()
         {
             xoffs = yoffs = 0;
-            xmin = xmax = ymin = ymax = (short)(m / 2);
+            xmin = xmax = ymin = ymax = (short)(512);
         }
 
         public override string ToString()
         {
-            return $"Xz={xoffs} Yz={yoffs} XM[{xmin},{xmax}] YM[{ymin},{ymax}]";
+            return $"Xz={xoffs} Yz={yoffs} XM=[{xmin},{xmax}] YM=[{ymin},{ymax}] ScaleTo={scaleTo}";
         }
 
         public void Draw(Graphics gfx, Font fnt, int x, int y)
@@ -29,9 +29,11 @@ namespace GPCalib
             gfx.DrawString(ToString(), fnt, Brushes.Green, x, y);
         }
 
-        public void Apply(ushort scaleFrom, ushort scaleTo, ref short x, ref short y)
+        public void Apply(ref short x, ref short y)
         {
+            ushort scaleFrom = 1024;
             short m2 = (short)(scaleFrom / 2);
+            short mTo2 = (short)(scaleTo / 2);
             short cx = (short)(m2 + xoffs);
             short cy = (short)(m2 + yoffs);
 
@@ -47,18 +49,17 @@ namespace GPCalib
             if (x < 0) x = (short)((x) * dXmin);
             if (x >= 0) x = (short)((x) * dXmax);
 
-
             if (y < 0) y = (short)((y) * dYmin);
             if (y >= 0) y = (short)((y) * dYmax);
 
             x = (short)(x * scaleFactor);
             y = (short)(y * scaleFactor);
 
-            //if (x >= m2) x = (short)(m2 - 1);
-            //if (x < -m2) x = (short)(-m2);
+            if (x >= mTo2) x = (short)(mTo2 - 1);
+            if (x < -mTo2) x = (short)(-mTo2);
 
-            //if (y >= m2) y = (short)(m2 - 1);
-            //if (y < -m2) y = (short)(-m2);
+            if (y >= mTo2) y = (short)(mTo2 - 1);
+            if (y < -mTo2) y = (short)(-mTo2);
         }
 
         internal void Copy(StickCalib v)
@@ -69,6 +70,7 @@ namespace GPCalib
             xmax = v.xmax;
             ymin = v.ymin;
             ymax = v.ymax;
+            scaleTo = v.scaleTo;
         }
 
         internal byte[] ToArray()
@@ -82,6 +84,7 @@ namespace GPCalib
             bw.Write(ymax);
             bw.Write(xoffs);
             bw.Write(yoffs);
+            bw.Write(scaleTo);
 
             return ms.ToArray();
         }
@@ -89,26 +92,21 @@ namespace GPCalib
 
     public class Settings
     {
-        public bool scale_enabled;
         public bool calib_enabled;
         public bool uart_adapter_enabled;
-        public ushort scale_from;
-        public ushort scale_to;
         public StickCalib calib_left;
         public StickCalib calib_right;
 
         public Settings()
         {
-            scale_from = 1024;
-            scale_to = 1024;
             calib_left = new StickCalib();
             calib_right = new StickCalib();
         }
 
         public void Reset()
         {
-            calib_left.Reset(scale_from);
-            calib_right.Reset(scale_from);
+            calib_left.Reset();
+            calib_right.Reset();
         }
 
         public void Load(string file = "dev_settings")
@@ -117,11 +115,8 @@ namespace GPCalib
             if (!File.Exists(fname)) return;
             var json = File.ReadAllText(fname);
             var s = Newtonsoft.Json.JsonConvert.DeserializeObject<Settings>(json);
-            scale_enabled = s.scale_enabled;
             calib_enabled = s.calib_enabled;
             uart_adapter_enabled = s.uart_adapter_enabled;
-            scale_from = s.scale_from;
-            scale_to = s.scale_to;
             calib_left.Copy(s.calib_left);
             calib_right.Copy(s.calib_right);
         }
@@ -136,11 +131,8 @@ namespace GPCalib
         {
             var ms = new MemoryStream();
             BinaryWriter bw = new BinaryWriter(ms);
-            bw.Write(scale_enabled);
             bw.Write(calib_enabled);
             bw.Write(uart_adapter_enabled);
-            bw.Write(scale_from);
-            bw.Write(scale_to);
             bw.Write(calib_left.ToArray());
             bw.Write(calib_right.ToArray());
             return ms.ToArray();
@@ -160,11 +152,8 @@ namespace GPCalib
         public Settings Clone()
         {
             var s = new Settings();
-            s.scale_enabled = scale_enabled;
             s.calib_enabled = calib_enabled;
             s.uart_adapter_enabled = uart_adapter_enabled;
-            s.scale_from = scale_from;
-            s.scale_to = scale_to;
             s.calib_left.Copy(calib_left);
             s.calib_right.Copy(calib_right);
 

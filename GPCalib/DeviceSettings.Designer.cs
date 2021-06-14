@@ -29,17 +29,11 @@ namespace GPCalib
         /// </summary>
         private void InitializeComponent()
         {
-            this.cbEnableScale = new System.Windows.Forms.CheckBox();
             this.cbEnableCalib = new System.Windows.Forms.CheckBox();
             this.cbEnableUart = new System.Windows.Forms.CheckBox();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
             this.gbToggles = new System.Windows.Forms.GroupBox();
-            this.gpParams = new System.Windows.Forms.GroupBox();
-            this.nTo = new System.Windows.Forms.NumericUpDown();
-            this.nFrom = new System.Windows.Forms.NumericUpDown();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
             this.btnRead = new System.Windows.Forms.Button();
             this.btnWrite = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -57,21 +51,22 @@ namespace GPCalib
             this.label26 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.nRightOffsetY = new System.Windows.Forms.NumericUpDown();
+            this.label8 = new System.Windows.Forms.Label();
             this.nRightOffsetX = new System.Windows.Forms.NumericUpDown();
+            this.label7 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
+            this.nRightMinX = new System.Windows.Forms.NumericUpDown();
             this.label4 = new System.Windows.Forms.Label();
+            this.nRightMaxX = new System.Windows.Forms.NumericUpDown();
             this.nRightMaxY = new System.Windows.Forms.NumericUpDown();
+            this.label6 = new System.Windows.Forms.Label();
             this.nRightMinY = new System.Windows.Forms.NumericUpDown();
             this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.nRightMaxX = new System.Windows.Forms.NumericUpDown();
-            this.nRightMinX = new System.Windows.Forms.NumericUpDown();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
+            this.nLeftScaleTo = new System.Windows.Forms.NumericUpDown();
+            this.label1 = new System.Windows.Forms.Label();
+            this.nRightScaleTo = new System.Windows.Forms.NumericUpDown();
+            this.label2 = new System.Windows.Forms.Label();
             this.gbToggles.SuspendLayout();
-            this.gpParams.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.nTo)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nFrom)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nLeftOffsetY)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nLeftOffsetX)).BeginInit();
@@ -82,26 +77,18 @@ namespace GPCalib
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nRightOffsetY)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nRightOffsetX)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nRightMinX)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nRightMaxX)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nRightMaxY)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.nRightMinY)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nRightMaxX)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nRightMinX)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nLeftScaleTo)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nRightScaleTo)).BeginInit();
             this.SuspendLayout();
-            // 
-            // cbEnableScale
-            // 
-            this.cbEnableScale.AutoSize = true;
-            this.cbEnableScale.Location = new System.Drawing.Point(6, 19);
-            this.cbEnableScale.Name = "cbEnableScale";
-            this.cbEnableScale.Size = new System.Drawing.Size(95, 17);
-            this.cbEnableScale.TabIndex = 17;
-            this.cbEnableScale.Text = "Enable scaling";
-            this.cbEnableScale.UseVisualStyleBackColor = true;
             // 
             // cbEnableCalib
             // 
             this.cbEnableCalib.AutoSize = true;
-            this.cbEnableCalib.Location = new System.Drawing.Point(6, 42);
+            this.cbEnableCalib.Location = new System.Drawing.Point(5, 22);
             this.cbEnableCalib.Name = "cbEnableCalib";
             this.cbEnableCalib.Size = new System.Drawing.Size(110, 17);
             this.cbEnableCalib.TabIndex = 18;
@@ -111,7 +98,7 @@ namespace GPCalib
             // cbEnableUart
             // 
             this.cbEnableUart.AutoSize = true;
-            this.cbEnableUart.Location = new System.Drawing.Point(5, 65);
+            this.cbEnableUart.Location = new System.Drawing.Point(5, 45);
             this.cbEnableUart.Name = "cbEnableUart";
             this.cbEnableUart.Size = new System.Drawing.Size(135, 17);
             this.cbEnableUart.TabIndex = 19;
@@ -140,80 +127,14 @@ namespace GPCalib
             // 
             // gbToggles
             // 
-            this.gbToggles.Controls.Add(this.cbEnableScale);
             this.gbToggles.Controls.Add(this.cbEnableCalib);
             this.gbToggles.Controls.Add(this.cbEnableUart);
             this.gbToggles.Location = new System.Drawing.Point(298, 12);
             this.gbToggles.Name = "gbToggles";
-            this.gbToggles.Size = new System.Drawing.Size(158, 91);
+            this.gbToggles.Size = new System.Drawing.Size(158, 67);
             this.gbToggles.TabIndex = 5;
             this.gbToggles.TabStop = false;
             this.gbToggles.Text = "Toggles";
-            // 
-            // gpParams
-            // 
-            this.gpParams.Controls.Add(this.nTo);
-            this.gpParams.Controls.Add(this.nFrom);
-            this.gpParams.Controls.Add(this.label2);
-            this.gpParams.Controls.Add(this.label1);
-            this.gpParams.Location = new System.Drawing.Point(12, 12);
-            this.gpParams.Name = "gpParams";
-            this.gpParams.Size = new System.Drawing.Size(280, 45);
-            this.gpParams.TabIndex = 6;
-            this.gpParams.TabStop = false;
-            this.gpParams.Text = "Common Parameters";
-            // 
-            // nTo
-            // 
-            this.nTo.Location = new System.Drawing.Point(192, 17);
-            this.nTo.Maximum = new decimal(new int[] {
-            32768,
-            0,
-            0,
-            0});
-            this.nTo.Minimum = new decimal(new int[] {
-            32768,
-            0,
-            0,
-            -2147483648});
-            this.nTo.Name = "nTo";
-            this.nTo.Size = new System.Drawing.Size(82, 20);
-            this.nTo.TabIndex = 4;
-            // 
-            // nFrom
-            // 
-            this.nFrom.Location = new System.Drawing.Point(70, 17);
-            this.nFrom.Maximum = new decimal(new int[] {
-            32768,
-            0,
-            0,
-            0});
-            this.nFrom.Minimum = new decimal(new int[] {
-            32768,
-            0,
-            0,
-            -2147483648});
-            this.nFrom.Name = "nFrom";
-            this.nFrom.Size = new System.Drawing.Size(77, 20);
-            this.nFrom.TabIndex = 3;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(153, 20);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(16, 13);
-            this.label2.TabIndex = 3;
-            this.label2.Text = "to";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 19);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(57, 13);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "Scale from";
             // 
             // btnRead
             // 
@@ -237,6 +158,8 @@ namespace GPCalib
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.nLeftScaleTo);
+            this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Controls.Add(this.nLeftOffsetY);
             this.groupBox1.Controls.Add(this.nLeftOffsetX);
             this.groupBox1.Controls.Add(this.label21);
@@ -249,9 +172,9 @@ namespace GPCalib
             this.groupBox1.Controls.Add(this.nLeftMinX);
             this.groupBox1.Controls.Add(this.label25);
             this.groupBox1.Controls.Add(this.label26);
-            this.groupBox1.Location = new System.Drawing.Point(12, 63);
+            this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(280, 104);
+            this.groupBox1.Size = new System.Drawing.Size(280, 133);
             this.groupBox1.TabIndex = 30;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Left Stick Parameters";
@@ -414,7 +337,9 @@ namespace GPCalib
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.nRightScaleTo);
             this.groupBox2.Controls.Add(this.nRightOffsetY);
+            this.groupBox2.Controls.Add(this.label2);
             this.groupBox2.Controls.Add(this.label8);
             this.groupBox2.Controls.Add(this.nRightOffsetX);
             this.groupBox2.Controls.Add(this.label7);
@@ -426,9 +351,9 @@ namespace GPCalib
             this.groupBox2.Controls.Add(this.label6);
             this.groupBox2.Controls.Add(this.nRightMinY);
             this.groupBox2.Controls.Add(this.label5);
-            this.groupBox2.Location = new System.Drawing.Point(12, 173);
+            this.groupBox2.Location = new System.Drawing.Point(12, 151);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(280, 104);
+            this.groupBox2.Size = new System.Drawing.Size(280, 134);
             this.groupBox2.TabIndex = 31;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "RightStick Parameters";
@@ -450,6 +375,15 @@ namespace GPCalib
             this.nRightOffsetY.Size = new System.Drawing.Size(82, 20);
             this.nRightOffsetY.TabIndex = 16;
             // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(7, 23);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(30, 13);
+            this.label8.TabIndex = 18;
+            this.label8.Text = "minX";
+            // 
             // nRightOffsetX
             // 
             this.nRightOffsetX.Location = new System.Drawing.Point(70, 77);
@@ -467,6 +401,15 @@ namespace GPCalib
             this.nRightOffsetX.Size = new System.Drawing.Size(77, 20);
             this.nRightOffsetX.TabIndex = 15;
             // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(153, 24);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(33, 13);
+            this.label7.TabIndex = 19;
+            this.label7.Text = "maxX";
+            // 
             // label3
             // 
             this.label3.AutoSize = true;
@@ -476,6 +419,23 @@ namespace GPCalib
             this.label3.TabIndex = 27;
             this.label3.Text = "offsetY";
             // 
+            // nRightMinX
+            // 
+            this.nRightMinX.Location = new System.Drawing.Point(70, 21);
+            this.nRightMinX.Maximum = new decimal(new int[] {
+            32768,
+            0,
+            0,
+            0});
+            this.nRightMinX.Minimum = new decimal(new int[] {
+            32768,
+            0,
+            0,
+            -2147483648});
+            this.nRightMinX.Name = "nRightMinX";
+            this.nRightMinX.Size = new System.Drawing.Size(77, 20);
+            this.nRightMinX.TabIndex = 11;
+            // 
             // label4
             // 
             this.label4.AutoSize = true;
@@ -484,6 +444,23 @@ namespace GPCalib
             this.label4.Size = new System.Drawing.Size(40, 13);
             this.label4.TabIndex = 26;
             this.label4.Text = "offsetX";
+            // 
+            // nRightMaxX
+            // 
+            this.nRightMaxX.Location = new System.Drawing.Point(192, 21);
+            this.nRightMaxX.Maximum = new decimal(new int[] {
+            32768,
+            0,
+            0,
+            0});
+            this.nRightMaxX.Minimum = new decimal(new int[] {
+            32768,
+            0,
+            0,
+            -2147483648});
+            this.nRightMaxX.Name = "nRightMaxX";
+            this.nRightMaxX.Size = new System.Drawing.Size(82, 20);
+            this.nRightMaxX.TabIndex = 12;
             // 
             // nRightMaxY
             // 
@@ -501,6 +478,15 @@ namespace GPCalib
             this.nRightMaxY.Name = "nRightMaxY";
             this.nRightMaxY.Size = new System.Drawing.Size(82, 20);
             this.nRightMaxY.TabIndex = 14;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(7, 51);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(30, 13);
+            this.label6.TabIndex = 22;
+            this.label6.Text = "minY";
             // 
             // nRightMinY
             // 
@@ -528,66 +514,57 @@ namespace GPCalib
             this.label5.TabIndex = 23;
             this.label5.Text = "maxY";
             // 
-            // label6
+            // nLeftScaleTo
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(7, 51);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(30, 13);
-            this.label6.TabIndex = 22;
-            this.label6.Text = "minY";
-            // 
-            // nRightMaxX
-            // 
-            this.nRightMaxX.Location = new System.Drawing.Point(192, 21);
-            this.nRightMaxX.Maximum = new decimal(new int[] {
+            this.nLeftScaleTo.Location = new System.Drawing.Point(70, 105);
+            this.nLeftScaleTo.Maximum = new decimal(new int[] {
             32768,
             0,
             0,
             0});
-            this.nRightMaxX.Minimum = new decimal(new int[] {
+            this.nLeftScaleTo.Minimum = new decimal(new int[] {
             32768,
             0,
             0,
             -2147483648});
-            this.nRightMaxX.Name = "nRightMaxX";
-            this.nRightMaxX.Size = new System.Drawing.Size(82, 20);
-            this.nRightMaxX.TabIndex = 12;
+            this.nLeftScaleTo.Name = "nLeftScaleTo";
+            this.nLeftScaleTo.Size = new System.Drawing.Size(77, 20);
+            this.nLeftScaleTo.TabIndex = 17;
             // 
-            // nRightMinX
+            // label1
             // 
-            this.nRightMinX.Location = new System.Drawing.Point(70, 21);
-            this.nRightMinX.Maximum = new decimal(new int[] {
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 107);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(44, 13);
+            this.label1.TabIndex = 16;
+            this.label1.Text = "scale to";
+            // 
+            // nRightScaleTo
+            // 
+            this.nRightScaleTo.Location = new System.Drawing.Point(70, 106);
+            this.nRightScaleTo.Maximum = new decimal(new int[] {
             32768,
             0,
             0,
             0});
-            this.nRightMinX.Minimum = new decimal(new int[] {
+            this.nRightScaleTo.Minimum = new decimal(new int[] {
             32768,
             0,
             0,
             -2147483648});
-            this.nRightMinX.Name = "nRightMinX";
-            this.nRightMinX.Size = new System.Drawing.Size(77, 20);
-            this.nRightMinX.TabIndex = 11;
+            this.nRightScaleTo.Name = "nRightScaleTo";
+            this.nRightScaleTo.Size = new System.Drawing.Size(77, 20);
+            this.nRightScaleTo.TabIndex = 19;
             // 
-            // label7
+            // label2
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(153, 24);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(33, 13);
-            this.label7.TabIndex = 19;
-            this.label7.Text = "maxX";
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(7, 23);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(30, 13);
-            this.label8.TabIndex = 18;
-            this.label8.Text = "minX";
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 108);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(44, 13);
+            this.label2.TabIndex = 18;
+            this.label2.Text = "scale to";
             // 
             // DeviceSettings
             // 
@@ -598,7 +575,6 @@ namespace GPCalib
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.btnWrite);
             this.Controls.Add(this.btnRead);
-            this.Controls.Add(this.gpParams);
             this.Controls.Add(this.gbToggles);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnSave);
@@ -606,10 +582,6 @@ namespace GPCalib
             this.Text = "DeviceSettings";
             this.gbToggles.ResumeLayout(false);
             this.gbToggles.PerformLayout();
-            this.gpParams.ResumeLayout(false);
-            this.gpParams.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.nTo)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nFrom)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nLeftOffsetY)).EndInit();
@@ -622,28 +594,23 @@ namespace GPCalib
             this.groupBox2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nRightOffsetY)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nRightOffsetX)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nRightMinX)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nRightMaxX)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nRightMaxY)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.nRightMinY)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nRightMaxX)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.nRightMinX)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nLeftScaleTo)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.nRightScaleTo)).EndInit();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private System.Windows.Forms.CheckBox cbEnableScale;
         private System.Windows.Forms.CheckBox cbEnableCalib;
         private System.Windows.Forms.CheckBox cbEnableUart;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.GroupBox gbToggles;
-        private System.Windows.Forms.GroupBox gpParams;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnRead;
-        private System.Windows.Forms.NumericUpDown nTo;
-        private System.Windows.Forms.NumericUpDown nFrom;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button btnWrite;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.NumericUpDown nLeftOffsetY;
@@ -671,5 +638,9 @@ namespace GPCalib
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.NumericUpDown nRightMinY;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.NumericUpDown nLeftScaleTo;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.NumericUpDown nRightScaleTo;
+        private System.Windows.Forms.Label label2;
     }
 }

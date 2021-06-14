@@ -26,12 +26,8 @@ namespace GPCalib
 
         private void BindToSettings()
         {
-            cbEnableScale.Checked = settings.scale_enabled;
             cbEnableCalib.Checked = settings.calib_enabled;
             cbEnableUart.Checked = settings.uart_adapter_enabled;
-
-            nFrom.Value = settings.scale_from;
-            nTo.Value = settings.scale_to;
 
             nLeftMinX.Value = settings.calib_left.xmin;
             nLeftMaxX.Value = settings.calib_left.xmax;
@@ -39,6 +35,7 @@ namespace GPCalib
             nLeftMaxY.Value = settings.calib_left.ymax;
             nLeftOffsetX.Value = settings.calib_left.xoffs;
             nLeftOffsetY.Value = settings.calib_left.yoffs;
+            nLeftScaleTo.Value = settings.calib_left.scaleTo;
 
             nRightMinX.Value = settings.calib_right.xmin;
             nRightMaxX.Value = settings.calib_right.xmax;
@@ -46,16 +43,13 @@ namespace GPCalib
             nRightMaxY.Value = settings.calib_right.ymax;
             nRightOffsetX.Value = settings.calib_right.xoffs;
             nRightOffsetY.Value = settings.calib_right.yoffs;
+            nRightScaleTo.Value = settings.calib_right.scaleTo;
         }
 
         private void SerializeFromUI()
         {
-            settings.scale_enabled = cbEnableScale.Checked;
             settings.calib_enabled = cbEnableCalib.Checked;
             settings.uart_adapter_enabled = cbEnableUart.Checked;
-
-            settings.scale_from = (ushort)nFrom.Value;
-            settings.scale_to = (ushort)nTo.Value;
 
             settings.calib_left.xmin = (short)nLeftMinX.Value;
             settings.calib_left.xmax = (short)nLeftMaxX.Value;
@@ -63,6 +57,7 @@ namespace GPCalib
             settings.calib_left.ymax = (short)nLeftMaxY.Value;
             settings.calib_left.xoffs = (short)nLeftOffsetX.Value;
             settings.calib_left.yoffs = (short)nLeftOffsetY.Value;
+            settings.calib_left.scaleTo = (short)nLeftScaleTo.Value;
 
             settings.calib_right.xmin = (short)nRightMinX.Value;
             settings.calib_right.xmax = (short)nRightMaxX.Value;
@@ -70,6 +65,7 @@ namespace GPCalib
             settings.calib_right.ymax = (short)nRightMaxY.Value;
             settings.calib_right.xoffs = (short)nRightOffsetX.Value;
             settings.calib_right.yoffs = (short)nRightOffsetY.Value;
+            settings.calib_right.scaleTo = (short)nRightScaleTo.Value;
         }
 
         private void btnRead_Click(object sender, EventArgs e)
@@ -79,23 +75,25 @@ namespace GPCalib
             if (report.Exists)
             {
                 var br = new BinaryReader(new MemoryStream(report.Data));
-                settings.scale_enabled = br.ReadBoolean();
                 settings.calib_enabled = br.ReadBoolean();
                 settings.uart_adapter_enabled = br.ReadBoolean();
-                settings.scale_from = br.ReadUInt16();
-                settings.scale_to = br.ReadUInt16();
+
                 settings.calib_left.xmin = br.ReadInt16();
                 settings.calib_left.xmax = br.ReadInt16();
                 settings.calib_left.ymin = br.ReadInt16();
                 settings.calib_left.ymax = br.ReadInt16();
                 settings.calib_left.xoffs = br.ReadInt16();
                 settings.calib_left.yoffs = br.ReadInt16();
+                settings.calib_left.scaleTo = br.ReadInt16();
+
                 settings.calib_right.xmin = br.ReadInt16();
                 settings.calib_right.xmax = br.ReadInt16();
                 settings.calib_right.ymin = br.ReadInt16();
                 settings.calib_right.ymax = br.ReadInt16();
                 settings.calib_right.xoffs = br.ReadInt16();
                 settings.calib_right.yoffs = br.ReadInt16();
+                settings.calib_right.scaleTo = br.ReadInt16();
+
                 BindToSettings();
             }
             this.Enabled = true;
