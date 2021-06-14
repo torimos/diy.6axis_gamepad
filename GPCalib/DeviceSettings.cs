@@ -21,7 +21,6 @@ namespace GPCalib
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            settings.Load();
             BindToSettings();
         }
 
@@ -122,11 +121,13 @@ namespace GPCalib
         {
             SerializeFromUI();
             settings.Save();
+            this.DialogResult = DialogResult.OK;
             this.Close();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
+            this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
     }

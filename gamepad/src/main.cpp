@@ -59,10 +59,12 @@ void setup()
 {
     memset(&usb_report, 0, sizeof(usb_report));
     memset(&usb_params_report, 0, sizeof(usb_params_report));
+    
+    io_init();
     pdev = USB_Init(&USBD_HID_Class);
     
     leds_init();
-    #if DEBUG_LVL > 0
+    #if DEBUG_LVL >= 1
     Serial.begin(115200);
     #endif
     bool settings_loaded = settings_init();
@@ -79,7 +81,6 @@ void setup()
         leds_set(0);
     }
     
-    io_init();
 
     digitalWrite(EXT1, settings.uart_adapter_enabled);
     if (settings.uart_adapter_enabled)
@@ -145,7 +146,7 @@ void update()
         acc.getAcceleration(&usb_report.data.accel_data[0], &usb_report.data.accel_data[1], &usb_report.data.accel_data[2]);
 
     data_checksum = get_CRC32((uint8_t*)&usb_report.data, sizeof(joy_data_t));
-    #if DEBUG_LVL >= 2
+    #if DEBUG_LVL >= 1
     Serial.printf("L=%4d:%4d  R=%4d:%4d  M=%4d:%4d:%4d  A=%4d:%4d:%4d  G=%4d:%4d:%4d  BTN=%08X  sleep_timeout=%d\n\r", 
         usb_report.data.axis_data[0], usb_report.data.axis_data[1], usb_report.data.axis_data[2], usb_report.data.axis_data[3], 
         usb_report.data.mag_data[0], usb_report.data.mag_data[1], usb_report.data.mag_data[2],

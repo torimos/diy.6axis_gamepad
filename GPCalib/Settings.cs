@@ -29,7 +29,7 @@ namespace GPCalib
             gfx.DrawString(ToString(), fnt, Brushes.Green, x, y);
         }
 
-        public void Apply(short m, ref short x, ref short y)
+        public void Apply(ushort m, ref short x, ref short y)
         {
             short m2 = (short)(m / 2);
             short cx = (short)(m2 + xoffs);
@@ -149,6 +149,20 @@ namespace GPCalib
             bw.Write(data);
             var toRep = ms.ToArray();
             return toRep;
+        }
+
+        public Settings Clone()
+        {
+            var s = new Settings();
+            s.scale_enabled = scale_enabled;
+            s.calib_enabled = calib_enabled;
+            s.uart_adapter_enabled = uart_adapter_enabled;
+            s.scale_from = scale_from;
+            s.scale_to = scale_to;
+            s.calib_left.Copy(calib_left);
+            s.calib_right.Copy(calib_right);
+
+            return s;
         }
     }
 }

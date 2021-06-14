@@ -14,14 +14,15 @@ namespace GPCalib
 {
     public partial class Form1 : Form
     {
-        class JoyDataType {
-            public ushort buttons;
-            public ushort triggers;
-            public ushort[] axis;
+        class JoyDataType
+        {
+            public byte status;
+            public UInt32 buttons;
+            public short[] axis;
             public bool ready;
             public JoyDataType()
             {
-                axis = new ushort[4];
+                axis = new short[4];
             }
             public JoyDataType Copy()
             {
@@ -98,15 +99,22 @@ namespace GPCalib
             if (report.ReportId == 1)
             {
                 var r = new JoyDataType();
-                r.buttons = br.ReadUInt16();
-                r.triggers = br.ReadUInt16();
-                r.axis[0] = br.ReadUInt16();
-                r.axis[1] = br.ReadUInt16();
-                r.axis[2] = br.ReadUInt16();
-                r.axis[3] = br.ReadUInt16();
+                r.status = br.ReadByte();
+                r.buttons = br.ReadUInt32();
+                r.axis[0] = br.ReadInt16();
+                r.axis[1] = br.ReadInt16();
+                r.axis[2] = br.ReadInt16();
+                r.axis[3] = br.ReadInt16();
+
+                var rs = new SensDataType();
+                for (int i = 0; i < 3; i++) rs.mag[i] = (br.ReadInt16());
+                for (int i = 0; i < 3; i++) rs.accel[i] = (br.ReadInt16());
+                for (int i = 0; i < 3; i++) rs.gyro[i] = (br.ReadInt16());
 
                 joyReport = r.Copy();
+                sensReport = rs.Copy();
                 joyReport.ready = true;
+                sensReport.ready = true;
             }
             else if (report.ReportId == 2)
             {
@@ -186,15 +194,17 @@ namespace GPCalib
             heading = z * (int)(heading / z);
         }
 
-        void drawAxis(Graphics gfx, Brush br, int x, int y, int cx, int cy, int m, StickCalib calib, int maxV)
+        void drawAxis(Graphics gfx, Brush br, short x, short y, int cx, int cy, int m, StickCalib calib, int maxV)
         {
             const float pd = 5f;
             var m2 = m >> 1;
             var dV = m / (float)maxV;
 
-            int x1 = x;
-            int y1 = y;
-            //calib.Apply(ref x1, ref y1);
+            short x1 = x;
+            short y1 = y;
+
+            if (settings.calib_enabled)
+                calib.Apply(settings.scale_to, ref x1, ref y1);
 
             gfx.DrawRectangle(new Pen(br), cx, cy, m, m);
             gfx.DrawString($"{x}:{y} \n {x1 / 128}:{y1/128}", fnt, br, cx+1, cy+1);
@@ -246,7 +256,7 @@ namespace GPCalib
 
 
 
-            gfx.DrawString($"{joyReport.buttons:X} {joyReport.triggers:X}", fnt, Brushes.Green, cx, cy0);
+            gfx.DrawString($"{joyReport.buttons:X}", fnt, Brushes.Green, cx, cy0);
             settings.calib_left.Draw(gfx, fnt, cx + 50, cy0);
             settings.calib_right.Draw(gfx, fnt, cx + 50, cy0 + 16);
 
@@ -286,25 +296,29 @@ namespace GPCalib
             base.OnPaint(e);
             if (joyReport.ready)
             {
-                //settings.calib_left.xmin = Math.Min(settings.calib_left.xmin, joyReport.axis[0]);
-                //settings.calib_left.xmax = Math.Max(settings.calib_left.xmax, joyReport.axis[0]);
-                //settings.calib_left.ymin = Math.Min(settings.calib_left.ymin, joyReport.axis[1]);
-                //settings.calib_left.ymax = Math.Max(settings.calib_left.ymax, joyReport.axis[1]);
+                settings.calib_left.xmin = Math.Min(settings.calib_left.xmin, joyReport.axis[0]);
+                settings.calib_left.xmax = Math.Max(settings.calib_left.xmax, joyReport.axis[0]);
+                settings.calib_left.ymin = Math.Min(settings.calib_left.ymin, joyReport.axis[1]);
+                settings.calib_left.ymax = Math.Max(settings.calib_left.ymax, joyReport.axis[1]);
 
-                //settings.calib_right.xmin = Math.Min(settings.calib_right.xmin, joyReport.axis[2]);
-                //settings.calib_right.xmax = Math.Max(settings.calib_right.xmax, joyReport.axis[2]);
-                //settings.calib_right.ymin = Math.Min(settings.calib_right.ymin, joyReport.axis[3]);
-                //settings.calib_right.ymax = Math.Max(settings.calib_right.ymax, joyReport.axis[3]);
+                settings.calib_right.xmin = Math.Min(settings.calib_right.xmin, joyReport.axis[2]);
+                settings.calib_right.xmax = Math.Max(settings.calib_right.xmax, joyReport.axis[2]);
+                settings.calib_right.ymin = Math.Min(settings.calib_right.ymin, joyReport.axis[3]);
+                settings.calib_right.ymax = Math.Max(settings.calib_right.ymax, joyReport.axis[3]);
 
-                drawRPH(e.Graphics);
+                drawRPH(e.Graphics, true);
             }
         }
 
         private void settingsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DeviceSettings dlg = new DeviceSettings(device);
-            dlg.settings = settings;
+            dlg.settings = settings.Clone();
             DialogResult res = dlg.ShowDialog(this);
+            if (res == DialogResult.OK)
+            {
+                settings = dlg.settings.Clone();
+            }
         }
 
         protected override void OnKeyDown(KeyEventArgs e)
@@ -317,8 +331,8 @@ namespace GPCalib
             }
             else if (e.KeyCode == Keys.Z)
             {
-                //settings.calib_left.Update(settings.scale_to, joyReport.axis[0], joyReport.axis[1]);
-               // settings.calib_right.Update(settings.scale_to, joyReport.axis[2], joyReport.axis[3]);
+                settings.calib_left.Update(settings.scale_to, joyReport.axis[0], joyReport.axis[1]);
+                settings.calib_right.Update(settings.scale_to, joyReport.axis[2], joyReport.axis[3]);
             }
 
             if (e.KeyCode == Keys.Return)
