@@ -37,8 +37,8 @@ void loop() {
     {
       digitalWrite(EXT2, bleCon);
       #if DEBUG_LVL >= 2
-      Serial.printf("BTN=%04X  TL=%02X  TR=%02X  L=%4d:%4d  R=%4d:%4d  M=%4d:%4d:%4d  A=%4d:%4d:%4d  G=%4d:%4d:%4d\n\r",
-        report.data.buttons,  report.data.triggers & 0xFF, (report.data.triggers >> 8) & 0xFF, 
+      Serial.printf("BTN=%08X  L=%4d:%4d  R=%4d:%4d  M=%4d:%4d:%4d  A=%4d:%4d:%4d  G=%4d:%4d:%4d\n\r",
+        report.data.buttons,
         report.data.axis_data[0], report.data.axis_data[1], report.data.axis_data[2], report.data.axis_data[3], 
         report.sens.mag_data[0], report.sens.mag_data[1], report.sens.mag_data[2],
         report.sens.accel_data[0], report.sens.accel_data[1], report.sens.accel_data[2],

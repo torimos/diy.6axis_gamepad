@@ -115,9 +115,9 @@ void update()
     buttons |= !digitalRead(RIGHT_TDOWN) << 16;
 
     int x_l = analogRead(JADC_X_LEFT);
-    int y_l = analogRead(JADC_Y_LEFT);
+    int y_l = 1024 - analogRead(JADC_Y_LEFT);
     int x_r = analogRead(JADC_X_RIGHT);
-    int y_r = analogRead(JADC_Y_RIGHT);
+    int y_r = 1024 - analogRead(JADC_Y_RIGHT);
 
     usb_report.data.buttons = buttons;
     usb_report.data.axis_data[0] = x_l;

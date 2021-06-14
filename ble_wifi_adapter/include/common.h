@@ -10,8 +10,8 @@
 #pragma pack(push, 1)
 typedef struct
 {
-    uint16_t buttons;
-    uint16_t triggers;
+    uint8_t status;
+    uint32_t buttons;
     int16_t axis_data[4];
 } joy_data_t;
 typedef struct

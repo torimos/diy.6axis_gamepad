@@ -73,8 +73,8 @@ namespace GPCalib
 
             settings.Load();
 
-            //device = HidDevices.Enumerate(0xE502, 0xBBAB).FirstOrDefault();
-            device = HidDevices.Enumerate(0x0483, 0xBEAF).FirstOrDefault();
+            device = HidDevices.Enumerate(0xE502, 0xBBAB).FirstOrDefault();
+            //device = HidDevices.Enumerate(0x0483, 0xBEAF).FirstOrDefault();
             if (device != null)
             {
                 device.OpenDevice();
@@ -105,16 +105,18 @@ namespace GPCalib
                 r.axis[1] = br.ReadInt16();
                 r.axis[2] = br.ReadInt16();
                 r.axis[3] = br.ReadInt16();
-
-                var rs = new SensDataType();
-                for (int i = 0; i < 3; i++) rs.mag[i] = (br.ReadInt16());
-                for (int i = 0; i < 3; i++) rs.accel[i] = (br.ReadInt16());
-                for (int i = 0; i < 3; i++) rs.gyro[i] = (br.ReadInt16());
-
                 joyReport = r.Copy();
-                sensReport = rs.Copy();
                 joyReport.ready = true;
-                sensReport.ready = true;
+
+                if (device.Attributes.ProductId == 0xbeaf)
+                {
+                    var rs = new SensDataType();
+                    for (int i = 0; i < 3; i++) rs.mag[i] = (br.ReadInt16());
+                    for (int i = 0; i < 3; i++) rs.accel[i] = (br.ReadInt16());
+                    for (int i = 0; i < 3; i++) rs.gyro[i] = (br.ReadInt16());
+                    sensReport.ready = true;
+                    sensReport = rs.Copy();
+                }
             }
             else if (report.ReportId == 2)
             {
