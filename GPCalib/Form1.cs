@@ -73,8 +73,8 @@ namespace GPCalib
 
             settings.Load();
 
-            device = HidDevices.Enumerate(0xE502, 0xBBAB).FirstOrDefault();
-            //device = HidDevices.Enumerate(0x0483, 0xBEAF).FirstOrDefault();
+            //device = HidDevices.Enumerate(0xE502, 0xBBAB).FirstOrDefault();
+            device = HidDevices.Enumerate(0x0483, 0xBEAF).FirstOrDefault();
             if (device != null)
             {
                 device.OpenDevice();
@@ -93,6 +93,29 @@ namespace GPCalib
         {
         }
 
+        void SensBinRead(BinaryReader br)
+        {
+            var r = new SensDataType();
+            for (int i = 0; i < 3; i++) r.mag[i] = (br.ReadInt16());
+            for (int i = 0; i < 3; i++) r.accel[i] = (br.ReadInt16());
+            for (int i = 0; i < 3; i++) r.gyro[i] = (br.ReadInt16());
+
+            //http://www.phipi.com/pthsrobotics/compass_correct.html
+            //file:///D:/Downloads/compass_calib.pdf
+            float x_ampl = 210;
+            float x_offset = -80;
+            float y_ampl = 192;
+            float y_offset = -210;
+            r.mag[0] = (short)((r.mag[0] - x_offset) * 300.0 / x_ampl);
+            r.mag[1] = (short)((r.mag[1] - y_offset) * 300.0 / y_ampl);
+
+            sensReport = r.Copy();
+
+            calcHeading(sensReport);
+
+            sensReport.ready = true;
+        }
+
         private void OnReport(HidReport report)
         {
             var br = new BinaryReader(new MemoryStream(report.Data));
@@ -108,37 +131,14 @@ namespace GPCalib
                 joyReport = r.Copy();
                 joyReport.ready = true;
 
-                if (device.Attributes.ProductId == 0xbeaf)
+                if (device.Attributes.ProductId == 0xBEAF)
                 {
-                    var rs = new SensDataType();
-                    for (int i = 0; i < 3; i++) rs.mag[i] = (br.ReadInt16());
-                    for (int i = 0; i < 3; i++) rs.accel[i] = (br.ReadInt16());
-                    for (int i = 0; i < 3; i++) rs.gyro[i] = (br.ReadInt16());
-                    sensReport.ready = true;
-                    sensReport = rs.Copy();
+                    SensBinRead(br);
                 }
             }
             else if (report.ReportId == 2)
             {
-                var r = new SensDataType();
-                for (int i = 0; i < 3; i++) r.mag[i] = (br.ReadInt16());
-                for (int i = 0; i < 3; i++) r.accel[i] = (br.ReadInt16());
-                for (int i = 0; i < 3; i++) r.gyro[i] = (br.ReadInt16());
-
-                //http://www.phipi.com/pthsrobotics/compass_correct.html
-                //file:///D:/Downloads/compass_calib.pdf
-                float x_ampl = 210;
-                float x_offset = -80;
-                float y_ampl = 192;
-                float y_offset = -210;
-                r.mag[0] = (short)((r.mag[0] - x_offset) * 300.0 / x_ampl);
-                r.mag[1] = (short)((r.mag[1] - y_offset) * 300.0 / y_ampl);
-
-                sensReport = r.Copy();
-
-                calcHeading(sensReport);
-
-                sensReport.ready = true;
+                SensBinRead(br);
             }
 
             device.ReadReport(OnReport);
