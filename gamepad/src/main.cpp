@@ -128,9 +128,9 @@ void update()
     if (settings.scale_enabled)
     {
         usb_report.data.axis_data[0] = scale(usb_report.data.axis_data[0], settings.scale_from, settings.scale_to);
-        usb_report.data.axis_data[1] = scale(settings.scale_from-usb_report.data.axis_data[1], settings.scale_from, settings.scale_to);
+        usb_report.data.axis_data[1] = scale(usb_report.data.axis_data[1], settings.scale_from, settings.scale_to);
         usb_report.data.axis_data[2] = scale(usb_report.data.axis_data[2], settings.scale_from, settings.scale_to);
-        usb_report.data.axis_data[3] = scale(settings.scale_from-usb_report.data.axis_data[3], settings.scale_from, settings.scale_to);
+        usb_report.data.axis_data[3] = scale(usb_report.data.axis_data[3], settings.scale_from, settings.scale_to);
     }
     if (settings.calib_enabled)
     {
